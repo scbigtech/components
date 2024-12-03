@@ -9,6 +9,29 @@
     <script nomodule src="/build/components.js"></script>
   </head>
   <body>
-    <my-component first="Stencil" middle="'Don't call me a framework'" last="JS"></my-component>
+    <bt-stepper style="--main-hue: 20">
+      <bt-step-item
+        >Step 1
+        <input type="checkbox" id="step1-check" />
+        <label for="step1-check">Accept</label>
+      </bt-step-item>
+      <bt-step-item>Step 2</bt-step-item>
+      <bt-step-item>Step 3</bt-step-item>
+    </bt-stepper>
+
+    <script type="module">
+      window.addEventListener('load', () => {
+        const stepper = document.querySelector('bt-stepper');
+        const checkbox = document.getElementById('step1-check');
+
+        checkbox.addEventListener('change', () => {
+          const isValid = checkbox.checked;
+          stepper.setStepValidity(0, isValid);
+        });
+
+        // Inicializar la validez del primer paso
+        stepper.setStepValidity(0, checkbox.checked);
+      });
+    </script>
   </body>
 </html>

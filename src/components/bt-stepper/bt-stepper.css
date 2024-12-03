@@ -1,0 +1,93 @@
+:host {
+  display: block;
+  font-family: Arial, sans-serif;
+  border: 1px solid var(--stepper-border-color, #ddd);
+  padding: 1em;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ --main-hue: 210; /* (azul) */
+ --completed-hue: 120; /*(verde) */
+ --invalid-hue: 0; /*(rojo) */
+ 
+ --main-saturation: 100%; /* Saturación del color */
+ --completed-saturation: 100%; /* Saturación del color completado */
+ --invalid-saturation: 100%; /* Saturación del color inválido */
+ 
+ --main-lightness: 50%; /* Luminosidad del color principal */
+ --completed-lightness: 50%; /* Luminosidad del color completado */
+ --invalid-lightness: 50%; /* Luminosidad del color inválido */
+ 
+ /* Colores base */
+ --main-color: hsl(var(--main-hue), var(--main-saturation), var(--main-lightness));
+ --completed-color: hsl(var(--completed-hue), var(--completed-saturation), var(--completed-lightness));
+ --invalid-color: hsl(var(--invalid-hue), var(--invalid-saturation), var(--invalid-lightness));
+
+ /* Colores de los indicadores */
+ --indicator-active-bg: var(--main-color);
+ --indicator-active-color: white;
+ --indicator-active-border: var(--main-color);
+
+ --indicator-completed-bg: var(--completed-color);
+ --indicator-completed-color: white;
+ --indicator-completed-border: var(--completed-color);
+
+ --indicator-invalid-bg: var(--invalid-color);
+ --indicator-invalid-color: white;
+ --indicator-invalid-border: var(--invalid-color);
+}
+
+#indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.indicator {
+  width: 30px;
+  height: 30px;
+  background-color: var(--indicator-bg, #f0f0f0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid transparent;
+  color: var(--indicator-color, black);
+}
+
+.indicator:disabled {
+  cursor: not-allowed;
+}
+
+.indicator.active {
+  background-color: var(--indicator-active-bg, #007bff);
+  color: var(--indicator-active-color, white);
+  border-color: var(--indicator-active-border, #007bff);
+}
+
+.indicator.completed {
+  background-color: var(--indicator-completed-bg, #28a745);
+  color: var(--indicator-completed-color, white);
+  border-color: var(--indicator-completed-border, #28a745);
+}
+
+.indicator.invalid {
+  background-color: var(--indicator-invalid-bg, #dc3545) !important;
+  color: var(--indicator-invalid-color, white) !important;
+  border-color: var(--indicator-invalid-border, #dc3545) !important;
+}
+
+#controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1em;
+}
+
+/*  */
+
+bt-button{
+  --button-hue: var(--main-hue);
+  --button-color: var(--indicator-active-color, white);
+}

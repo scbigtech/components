@@ -6,56 +6,92 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
-    interface MyComponent {
+    interface BtButton {
+        "disabled": boolean;
         /**
-          * The first name
+          * Properties for controlling button states
          */
-        "first": string;
-        /**
-          * The last name
-         */
-        "last": string;
-        /**
-          * The middle name
-         */
-        "middle": string;
+        "loading": boolean;
+        "success": boolean;
+        "validate"?: boolean;
+    }
+    interface BtStepItem {
+    }
+    interface BtStepper {
+        "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
     }
 }
+export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLBtButtonElement;
+}
 declare global {
-    interface HTMLMyComponentElement extends Components.MyComponent, HTMLStencilElement {
+    interface HTMLBtButtonElementEventMap {
+        "btButtonClick": { valid: boolean };
     }
-    var HTMLMyComponentElement: {
-        prototype: HTMLMyComponentElement;
-        new (): HTMLMyComponentElement;
+    interface HTMLBtButtonElement extends Components.BtButton, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtButtonElementEventMap>(type: K, listener: (this: HTMLBtButtonElement, ev: BtButtonCustomEvent<HTMLBtButtonElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtButtonElementEventMap>(type: K, listener: (this: HTMLBtButtonElement, ev: BtButtonCustomEvent<HTMLBtButtonElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLBtButtonElement: {
+        prototype: HTMLBtButtonElement;
+        new (): HTMLBtButtonElement;
+    };
+    interface HTMLBtStepItemElement extends Components.BtStepItem, HTMLStencilElement {
+    }
+    var HTMLBtStepItemElement: {
+        prototype: HTMLBtStepItemElement;
+        new (): HTMLBtStepItemElement;
+    };
+    interface HTMLBtStepperElement extends Components.BtStepper, HTMLStencilElement {
+    }
+    var HTMLBtStepperElement: {
+        prototype: HTMLBtStepperElement;
+        new (): HTMLBtStepperElement;
     };
     interface HTMLElementTagNameMap {
-        "my-component": HTMLMyComponentElement;
+        "bt-button": HTMLBtButtonElement;
+        "bt-step-item": HTMLBtStepItemElement;
+        "bt-stepper": HTMLBtStepperElement;
     }
 }
 declare namespace LocalJSX {
-    interface MyComponent {
+    interface BtButton {
+        "disabled"?: boolean;
         /**
-          * The first name
+          * Properties for controlling button states
          */
-        "first"?: string;
+        "loading"?: boolean;
         /**
-          * The last name
+          * Event emitted when the button is clicked
          */
-        "last"?: string;
-        /**
-          * The middle name
-         */
-        "middle"?: string;
+        "onBtButtonClick"?: (event: BtButtonCustomEvent<{ valid: boolean }>) => void;
+        "success"?: boolean;
+        "validate"?: boolean;
+    }
+    interface BtStepItem {
+    }
+    interface BtStepper {
     }
     interface IntrinsicElements {
-        "my-component": MyComponent;
+        "bt-button": BtButton;
+        "bt-step-item": BtStepItem;
+        "bt-stepper": BtStepper;
     }
 }
 export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
-            "my-component": LocalJSX.MyComponent & JSXBase.HTMLAttributes<HTMLMyComponentElement>;
+            "bt-button": LocalJSX.BtButton & JSXBase.HTMLAttributes<HTMLBtButtonElement>;
+            "bt-step-item": LocalJSX.BtStepItem & JSXBase.HTMLAttributes<HTMLBtStepItemElement>;
+            "bt-stepper": LocalJSX.BtStepper & JSXBase.HTMLAttributes<HTMLBtStepperElement>;
         }
     }
 }
