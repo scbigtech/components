@@ -8,6 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface BtButton {
         "disabled": boolean;
+        "hideText": boolean;
         /**
           * Properties for controlling button states
          */
@@ -16,6 +17,10 @@ export namespace Components {
         "validate"?: boolean;
     }
     interface BtStepItem {
+        /**
+          * Método para ejecutar una tarea asíncrona. Notifica al padre antes y después de la ejecución.
+         */
+        "task": (cb: () => Promise<void>) => Promise<void>;
     }
     interface BtStepper {
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
@@ -24,6 +29,14 @@ export namespace Components {
 export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLBtButtonElement;
+}
+export interface BtStepItemCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLBtStepItemElement;
+}
+export interface BtStepperCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLBtStepperElement;
 }
 declare global {
     interface HTMLBtButtonElementEventMap {
@@ -43,13 +56,36 @@ declare global {
         prototype: HTMLBtButtonElement;
         new (): HTMLBtButtonElement;
     };
+    interface HTMLBtStepItemElementEventMap {
+        "asyncStart": void;
+        "asyncEnd": void;
+    }
     interface HTMLBtStepItemElement extends Components.BtStepItem, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtStepItemElementEventMap>(type: K, listener: (this: HTMLBtStepItemElement, ev: BtStepItemCustomEvent<HTMLBtStepItemElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtStepItemElementEventMap>(type: K, listener: (this: HTMLBtStepItemElement, ev: BtStepItemCustomEvent<HTMLBtStepItemElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLBtStepItemElement: {
         prototype: HTMLBtStepItemElement;
         new (): HTMLBtStepItemElement;
     };
+    interface HTMLBtStepperElementEventMap {
+        "step": number;
+    }
     interface HTMLBtStepperElement extends Components.BtStepper, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtStepperElementEventMap>(type: K, listener: (this: HTMLBtStepperElement, ev: BtStepperCustomEvent<HTMLBtStepperElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtStepperElementEventMap>(type: K, listener: (this: HTMLBtStepperElement, ev: BtStepperCustomEvent<HTMLBtStepperElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLBtStepperElement: {
         prototype: HTMLBtStepperElement;
@@ -64,6 +100,7 @@ declare global {
 declare namespace LocalJSX {
     interface BtButton {
         "disabled"?: boolean;
+        "hideText"?: boolean;
         /**
           * Properties for controlling button states
          */
@@ -76,8 +113,11 @@ declare namespace LocalJSX {
         "validate"?: boolean;
     }
     interface BtStepItem {
+        "onAsyncEnd"?: (event: BtStepItemCustomEvent<void>) => void;
+        "onAsyncStart"?: (event: BtStepItemCustomEvent<void>) => void;
     }
     interface BtStepper {
+        "onStep"?: (event: BtStepperCustomEvent<number>) => void;
     }
     interface IntrinsicElements {
         "bt-button": BtButton;

@@ -1,4 +1,4 @@
-import { Component, h, State, Element, Method } from '@stencil/core';
+import { Component, h, State, Element, Method , EventEmitter, Event} from '@stencil/core';
 import type { btButton } from '../bt-button/bt-button';
 
 @Component({
@@ -9,17 +9,30 @@ import type { btButton } from '../bt-button/bt-button';
 export class BtStepper {
   @State() currentStep: number = 0;
   @State() completedSteps: Set<number> = new Set();
+  @State() asyncAction: boolean = false;
+
+  @Event() step: EventEmitter<number>;
   
   @Element() el!: HTMLElement;
 
   private steps: HTMLElement[] = [];
 
+  connectedCallback() {
+    this.el!.addEventListener('asyncStart', this.handleAsyncStart.bind(this));
+    this.el!.addEventListener('asyncEnd', this.handleAsyncEnd.bind(this));
+  }
+
+  disconnectedCallback() {
+    this.el!.removeEventListener('asyncStart', this.handleAsyncStart.bind(this));
+    this.el!.removeEventListener('asyncEnd', this.handleAsyncEnd.bind(this));
+  }
   componentWillLoad() {
     this.initializeSteps();
   }
 
   componentDidLoad() {
     this.updateStep();
+    this.step.emit(this.currentStep);
   }
 
   /**
@@ -58,7 +71,7 @@ export class BtStepper {
     indicators.forEach((indicator: HTMLElement, index) => {
       indicator.classList.toggle('active', index === this.currentStep);
       indicator.classList.toggle('completed', index < this.currentStep);
-      if (indicator.classList.contains('completed')) {
+      if (indicator.classList.contains('completed') || index === this.currentStep) {
         indicator.setAttribute('tabindex', '0');
         indicator.removeAttribute('disabled');
       } else {
@@ -74,6 +87,7 @@ export class BtStepper {
     if (prevButton) {
       prevButton.disabled = this.currentStep === 0;
     }
+    
   }
 
   @Method()
@@ -115,6 +129,7 @@ export class BtStepper {
       this.currentStep = newStep;
       this.updateStep();
     }
+    this.step.emit(this.currentStep);
   }
 
   /**
@@ -174,6 +189,13 @@ export class BtStepper {
     );
   }
 
+  private handleAsyncStart() {
+    this.asyncAction = true;
+  }
+  private handleAsyncEnd() {
+    this.asyncAction = false;
+  }
+
   render() {
     return (
       <section>
@@ -182,7 +204,7 @@ export class BtStepper {
           <slot></slot>
         </div>
         <div id="controls">
-          <bt-button id="prev" disabled={this.currentStep === 0} onClick={() => this.changeStep(-1)}>
+          <bt-button id="prev" loading={this.asyncAction} disabled={this.currentStep === 0} onClick={() => this.changeStep(-1)}>
             <svg
               slot="icon-left"
               xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +225,7 @@ export class BtStepper {
             </svg>
             Back
           </bt-button>
-          <bt-button id="next" disabled={!this.isStepValid(this.currentStep) || this.currentStep === this.steps.length - 1} onClick={() => this.changeStep(1)}>
+          <bt-button id="next" loading={this.asyncAction} hideText disabled={!this.isStepValid(this.currentStep) || this.currentStep === this.steps.length - 1} onClick={() => this.changeStep(1)}>
             Next
             <svg
               slot="icon-right"

@@ -20,6 +20,7 @@ export class btButton {
   @Prop({ reflect: true }) success: boolean = false;
 
   @Prop({ reflect: true }) validate?: boolean;
+  @Prop({ reflect: true }) hideText: boolean = false;
 
   /**
    * Event emitted when the button is clicked
@@ -55,11 +56,13 @@ export class btButton {
 
     return (
       <button disabled={this.disabled || this.loading} class={buttonClass} onClick={() => this.handleClick()}>
-        <slot name="icon-left"></slot>
-        <span class="button__text">
-          <slot></slot>
+        <span class="button__content">
+          <slot name="icon-left"></slot>
+          <span class={`button__text ${this.hideText ? 'hidden' : ''}`}>
+            <slot></slot>
+          </span>
+          <slot name="icon-right"></slot>
         </span>
-        <slot name="icon-right"></slot>
       </button>
     );
   }
