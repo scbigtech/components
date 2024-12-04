@@ -6,22 +6,44 @@
     <title>Stencil Component Starter</title>
 
     <script type="module" src="/build/components.esm.js"></script>
-    <script nomodule src="/build/components.js"></script>
+    <!-- <script nomodule src="/build/components.js"></script> -->
+    <style>
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .bigmat-stepper {
+        --main-hue: 352.8;
+        --main-lightness: 43.9%;
+        --completed-hue: 213.8;
+        --completed-lightness: 25.1%;
+      }
+    </style>
   </head>
   <body>
-    <bt-stepper style="--main-hue: 20">
-      <bt-step-item
-        >Step 1
-        <input type="checkbox" id="step1-check" />
-        <label for="step1-check">Accept</label>
-      </bt-step-item>
-      <bt-step-item>Step 2</bt-step-item>
-      <bt-step-item>Step 3</bt-step-item>
-    </bt-stepper>
+    <div class="container">
+      <bt-stepper class="bigmat-stepper">
+        <bt-step-item>
+          Step 1
+          <input type="checkbox" id="step1-check" />
+          <label for="step1-check">Accept</label>
+        </bt-step-item>
+        <bt-step-item
+          ><p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula commodo magna, sed hendrerit ipsum viverra varius. Proin posuere arcu ligula, eget tempus sapien
+            consequat nec. Aliquam at mauris nec purus finibus rutrum. Nunc tellus est, hendrerit et dapibus condimentum, tincidunt at metus. Vivamus at iaculis elit. Nunc quis
+            consectetur velit. Pellentesque convallis justo lectus, quis volutpat elit bibendum in. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
+            ridiculus mus. Sed tincidunt ipsum mi, vel pretium nisi ornare nec.
+          </p>
+        </bt-step-item>
+        <bt-step-item>Step 3</bt-step-item>
+      </bt-stepper>
+    </div>
 
     <script type="module">
       window.addEventListener('load', () => {
-        const stepper = document.querySelector('bt-stepper');
+        const stepper = document.querySelector('.bigmat-stepper');
         const checkbox = document.getElementById('step1-check');
 
         checkbox.addEventListener('change', () => {

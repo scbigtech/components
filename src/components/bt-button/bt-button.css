@@ -11,7 +11,7 @@
   --button-disabled-bg: #ccc;
   --button-success-bg: #28a745;
   --button-color: white;
-  --button-loading-color: gray;
+  --button-loading-color: var(--button-bg);
   --icon-size: 1em;
   --spacing: 0.5em;
 }
@@ -20,7 +20,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5em 1em;
+  padding: 0.5em 0.75em;
   font-size: 1em;
   font-family: Arial, sans-serif;
   color: var(--button-color);
@@ -29,6 +29,7 @@ button {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, opacity 0.3s;
+  position: relative;
 }
 
 button:hover {
@@ -43,33 +44,22 @@ button:disabled {
 button.loading {
   background-color: var(--button-loading-color);
   cursor: progress;
+  filter: blur(1px);
 }
 
 button.success {
   background-color: var(--button-success-bg);
 }
 
-.icon {
-  width: var(--icon-size);
-  height: var(--icon-size);
-  fill: currentColor;
-}
-
-.icon-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-container.left {
-  margin-right: var(--spacing);
-}
-
-.icon-container.right {
-  margin-left: var(--spacing);
+.button__text {
+  display: inline-block;
+  padding-inline: .25em;
 }
 
 slot[name='icon']::slotted(*) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: var(--icon-size);
   height: var(--icon-size);
   display: inline-block;

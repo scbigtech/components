@@ -55,13 +55,11 @@ export class btButton {
 
     return (
       <button disabled={this.disabled || this.loading} class={buttonClass} onClick={() => this.handleClick()}>
-        <span class="icon-container left">
-          <slot name="icon-left"></slot>
+        <slot name="icon-left"></slot>
+        <span class="button__text">
+          <slot></slot>
         </span>
-        <slot></slot>
-        <span class="icon-container right">
-          <slot name="icon-right"></slot>
-        </span>
+        <slot name="icon-right"></slot>
       </button>
     );
   }

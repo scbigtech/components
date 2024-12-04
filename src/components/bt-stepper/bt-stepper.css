@@ -36,6 +36,10 @@
  --indicator-invalid-border: var(--invalid-color);
 }
 
+.content {
+  padding: 1rem;
+}
+
 #indicators {
   display: flex;
   justify-content: center;
@@ -62,6 +66,7 @@
 }
 
 .indicator.active {
+  pointer-events: none;
   background-color: var(--indicator-active-bg, #007bff);
   color: var(--indicator-active-color, white);
   border-color: var(--indicator-active-border, #007bff);

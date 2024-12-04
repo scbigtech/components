@@ -9,6 +9,7 @@ import type { btButton } from '../bt-button/bt-button';
 export class BtStepper {
   @State() currentStep: number = 0;
   @State() completedSteps: Set<number> = new Set();
+  
   @Element() el!: HTMLElement;
 
   private steps: HTMLElement[] = [];
@@ -21,14 +22,14 @@ export class BtStepper {
     this.updateStep();
   }
 
-/**
- * Initializes the steps in the stepper component.
- *
- * This function selects all 'bt-step-item' elements within the component,
- * stores them in the `steps` array, assigns each step a unique `data-index`
- * attribute based on its position, and hides all steps by setting their
- * display style to 'none'.
- */
+  /**
+   * Initializes the steps in the stepper component.
+   *
+   * This function selects all 'bt-step-item' elements within the component,
+   * stores them in the `steps` array, assigns each step a unique `data-index`
+   * attribute based on its position, and hides all steps by setting their
+   * display style to 'none'.
+   */
   private initializeSteps() {
     this.steps = Array.from(this.el.querySelectorAll('bt-step-item'));
     this.steps.forEach((step, index) => {
@@ -57,12 +58,12 @@ export class BtStepper {
     indicators.forEach((indicator: HTMLElement, index) => {
       indicator.classList.toggle('active', index === this.currentStep);
       indicator.classList.toggle('completed', index < this.currentStep);
-      if (!indicator.classList.contains('completed')) {
-        indicator.setAttribute('tabindex', '-1');
-        indicator.setAttribute('disabled', 'true');
-      } else {
+      if (indicator.classList.contains('completed')) {
         indicator.setAttribute('tabindex', '0');
         indicator.removeAttribute('disabled');
+      } else {
+        indicator.setAttribute('tabindex', '-1');
+        indicator.setAttribute('disabled', 'true');
       }
     });
     const nextButton = this.el.shadowRoot?.querySelector('#next') as unknown as btButton;
@@ -116,15 +117,15 @@ export class BtStepper {
     }
   }
 
-/**
- * Navigates to a specific step in the stepper.
- *
- * This function sets the current step to the specified index and updates the
- * stepper's state to reflect the change. It ensures that the provided index
- * is within the valid range of steps before performing the update.
- *
- * @param index The index of the step to navigate to.
- */
+  /**
+   * Navigates to a specific step in the stepper.
+   *
+   * This function sets the current step to the specified index and updates the
+   * stepper's state to reflect the change. It ensures that the provided index
+   * is within the valid range of steps before performing the update.
+   *
+   * @param index The index of the step to navigate to.
+   */
   private goToStep(index: number) {
     if (index >= 0 && index < this.steps.length) {
       this.currentStep = index;
@@ -175,31 +176,56 @@ export class BtStepper {
 
   render() {
     return (
-      <div>
+      <section>
         {this.renderIndicators()}
-        <slot></slot>
+        <div class="content">
+          <slot></slot>
+        </div>
         <div id="controls">
-          <bt-button
-            id="prev"
-            disabled={this.currentStep === 0}
-            onClick={() => this.changeStep(-1)}
-          >
-            <svg slot="icon-left"  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l4 4" /><path d="M5 12l4 -4" /></svg>
+          <bt-button id="prev" disabled={this.currentStep === 0} onClick={() => this.changeStep(-1)}>
+            <svg
+              slot="icon-left"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M5 12l14 0" />
+              <path d="M5 12l4 4" />
+              <path d="M5 12l4 -4" />
+            </svg>
             Back
           </bt-button>
-          <bt-button
-            id="next"
-            disabled={
-              !this.isStepValid(this.currentStep) ||
-              this.currentStep === this.steps.length - 1
-            }
-            onClick={() => this.changeStep(1)}
-          >
+          <bt-button id="next" disabled={!this.isStepValid(this.currentStep) || this.currentStep === this.steps.length - 1} onClick={() => this.changeStep(1)}>
             Next
-            <svg slot='icon-right' xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
+            <svg
+              slot="icon-right"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M5 12l14 0" />
+              <path d="M15 16l4 -4" />
+              <path d="M15 8l4 4" />
+            </svg>
           </bt-button>
         </div>
-      </div>
+      </section>
     );
   }
 }
