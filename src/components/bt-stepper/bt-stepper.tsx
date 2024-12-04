@@ -1,4 +1,4 @@
-import { Component, h, State, Element, Method , EventEmitter, Event} from '@stencil/core';
+import { Component, h, State, Element, Method, EventEmitter, Event, Fragment } from '@stencil/core';
 import type { btButton } from '../bt-button/bt-button';
 
 @Component({
@@ -12,7 +12,7 @@ export class BtStepper {
   @State() asyncAction: boolean = false;
 
   @Event() step: EventEmitter<number>;
-  
+
   @Element() el!: HTMLElement;
 
   private steps: HTMLElement[] = [];
@@ -87,7 +87,6 @@ export class BtStepper {
     if (prevButton) {
       prevButton.disabled = this.currentStep === 0;
     }
-    
   }
 
   @Method()
@@ -225,27 +224,56 @@ export class BtStepper {
             </svg>
             Back
           </bt-button>
-          <bt-button id="next" loading={this.asyncAction} hideText disabled={!this.isStepValid(this.currentStep) || this.currentStep === this.steps.length - 1} onClick={() => this.changeStep(1)}>
-            Next
-            <svg
-              slot="icon-right"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon"
+          {this.currentStep < this.steps.length - 1 && (
+            <bt-button
+              id="next"
+              loading={this.asyncAction}
+              hideText
+              disabled={!this.isStepValid(this.currentStep)}
+              onClick={() => this.changeStep(1)}
             >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M5 12l14 0" />
-              <path d="M15 16l4 -4" />
-              <path d="M15 8l4 4" />
-            </svg>
-          </bt-button>
+              Next{' '}
+              <svg
+                slot="icon-right"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l14 0" />
+                <path d="M15 16l4 -4" />
+                <path d="M15 8l4 4" />
+              </svg>
+            </bt-button>
+          )}
+          {this.currentStep === this.steps.length - 1 && (
+            <bt-button id="finish" success loading={this.asyncAction} disabled={!this.isStepValid(this.currentStep) || this.currentStep !== this.steps.length - 1}>
+              Finish{' '}
+              <svg
+                slot="icon-right"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l5 5l10 -10" />
+              </svg>
+            </bt-button>
+          )}
         </div>
       </section>
     );

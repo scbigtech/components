@@ -15,38 +15,52 @@
         --success-lightness: 25.1%;
       }
 
+      body{
+        font-size: 16px;
+      }
+
       .container {
+        min-height: 100vh;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
+
+      .box {
+        width: 100%;
         max-width: 500px;
         margin: 0 auto;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <bt-stepper class="bigmat-stepper">
-        <bt-step-item id="step0">
-          Step 1
-          <input type="checkbox" id="step0-check" />
-          <label for="step0-check">Accept</label>
-        </bt-step-item>
-        <bt-step-item id="step1">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula commodo magna, sed hendrerit ipsum viverra varius. Proin posuere arcu ligula, eget tempus sapien
-            consequat nec. Aliquam at mauris nec purus finibus rutrum. Nunc tellus est, hendrerit et dapibus condimentum, tincidunt at metus. Vivamus at iaculis elit. Nunc quis
-            consectetur velit. Pellentesque convallis justo lectus, quis volutpat elit bibendum in. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
-            ridiculus mus. Sed tincidunt ipsum mi, vel pretium nisi ornare nec.
-          </p>
-        </bt-step-item>
-        <bt-step-item>Step 3</bt-step-item>
-      </bt-stepper>
+      <bt-table id="table" page-size="50" isEditable></bt-table>
+      <div class="box">
+        <bt-stepper class="bigmat-stepper">
+          <bt-step-item id="step0">
+            Step 1
+            <input type="checkbox" id="step0-check" />
+            <label for="step0-check">Accept</label>
+          </bt-step-item>
+          <bt-step-item id="step1">
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula commodo magna, sed hendrerit ipsum viverra varius. Proin posuere arcu ligula, eget tempus
+              sapien consequat nec. Aliquam at mauris nec purus finibus rutrum. Nunc tellus est, hendrerit et dapibus condimentum, tincidunt at metus. Vivamus at iaculis elit. Nunc
+              quis consectetur velit. Pellentesque convallis justo lectus, quis volutpat elit bibendum in. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
+              ridiculus mus. Sed tincidunt ipsum mi, vel pretium nisi ornare nec.
+            </p>
+          </bt-step-item>
+          <bt-step-item> </bt-step-item>
+        </bt-stepper>
+      </div>
     </div>
 
     <script type="module">
       window.addEventListener('load', () => {
+        // #region Stepper
         const stepper = document.querySelector('.bigmat-stepper');
         const step1 = document.getElementById('step1');
         const checkbox = document.getElementById('step0-check');
@@ -62,13 +76,34 @@
             stepper.setStepValidity(0, checkbox.checked);
           }
           if (index === 1) {
+            if(step1.loaded) return;
             stepper.setStepValidity(1, false);
             step1.task(async () => {
               await new Promise(resolve => setTimeout(resolve, 2000));
+              step1.loaded = true;
               stepper.setStepValidity(1, true);
             });
           }
         });
+        // #endregion
+
+        // #region Table
+        const table = document.getElementById('table');
+        table.headers = [
+          { key: 'Name', label: 'Name', sortable: true, filterable: true },
+          { key: 'Age', label: 'Age', sortable: true, filterable: true },
+          { key: 'Actions', label: 'Actions', action: true },
+        ];
+        table.rows = [
+          { Name: 'Sebastian', Age: '<strong>30</strong>', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Maria', Age: '25', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Carlos', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Oscar', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+        ];
+        table.onCellAction((row, key) => {
+          console.log(`Cell clicked in column ${key}:`, row);
+        });
+        // #endregion
       });
     </script>
   </body>

@@ -1,10 +1,11 @@
-import { Component, h, Event, EventEmitter, Method } from '@stencil/core';
+import { Component, h, Event, EventEmitter, Method, Prop } from '@stencil/core';
 
 @Component({
   tag: 'bt-step-item',
   shadow: true,
 })
 export class BtStepItem {
+  @Prop() loaded: boolean = false;
   @Event() asyncStart: EventEmitter<void>; // Evento cuando empieza algo asíncrono
   @Event() asyncEnd: EventEmitter<void>; // Evento cuando termina algo asíncrono
 

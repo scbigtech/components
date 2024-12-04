@@ -17,6 +17,7 @@ export namespace Components {
         "validate"?: boolean;
     }
     interface BtStepItem {
+        "loaded": boolean;
         /**
           * Método para ejecutar una tarea asíncrona. Notifica al padre antes y después de la ejecución.
          */
@@ -24,6 +25,12 @@ export namespace Components {
     }
     interface BtStepper {
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
+    }
+    interface BtTable {
+        "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
+        "onCellAction": (handler: (row: { [key: string]: any; }, key: string) => void) => Promise<void>;
+        "pageSize": number;
+        "rows": { [key: string]: any }[];
     }
 }
 export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
@@ -91,10 +98,17 @@ declare global {
         prototype: HTMLBtStepperElement;
         new (): HTMLBtStepperElement;
     };
+    interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
+    }
+    var HTMLBtTableElement: {
+        prototype: HTMLBtTableElement;
+        new (): HTMLBtTableElement;
+    };
     interface HTMLElementTagNameMap {
         "bt-button": HTMLBtButtonElement;
         "bt-step-item": HTMLBtStepItemElement;
         "bt-stepper": HTMLBtStepperElement;
+        "bt-table": HTMLBtTableElement;
     }
 }
 declare namespace LocalJSX {
@@ -113,16 +127,23 @@ declare namespace LocalJSX {
         "validate"?: boolean;
     }
     interface BtStepItem {
+        "loaded"?: boolean;
         "onAsyncEnd"?: (event: BtStepItemCustomEvent<void>) => void;
         "onAsyncStart"?: (event: BtStepItemCustomEvent<void>) => void;
     }
     interface BtStepper {
         "onStep"?: (event: BtStepperCustomEvent<number>) => void;
     }
+    interface BtTable {
+        "headers"?: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
+        "pageSize"?: number;
+        "rows"?: { [key: string]: any }[];
+    }
     interface IntrinsicElements {
         "bt-button": BtButton;
         "bt-step-item": BtStepItem;
         "bt-stepper": BtStepper;
+        "bt-table": BtTable;
     }
 }
 export { LocalJSX as JSX };
@@ -132,6 +153,7 @@ declare module "@stencil/core" {
             "bt-button": LocalJSX.BtButton & JSXBase.HTMLAttributes<HTMLBtButtonElement>;
             "bt-step-item": LocalJSX.BtStepItem & JSXBase.HTMLAttributes<HTMLBtStepItemElement>;
             "bt-stepper": LocalJSX.BtStepper & JSXBase.HTMLAttributes<HTMLBtStepperElement>;
+            "bt-table": LocalJSX.BtTable & JSXBase.HTMLAttributes<HTMLBtTableElement>;
         }
     }
 }
