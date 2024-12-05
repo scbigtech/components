@@ -27,6 +27,7 @@ export namespace Components {
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
     }
     interface BtTable {
+        "getAllSelected": () => Promise<{ [key: string]: any; }[]>;
         "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
         "onCellAction": (handler: (row: { [key: string]: any; }, key: string) => void) => Promise<void>;
         "pageSize": number;
@@ -44,6 +45,10 @@ export interface BtStepItemCustomEvent<T> extends CustomEvent<T> {
 export interface BtStepperCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLBtStepperElement;
+}
+export interface BtTableCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLBtTableElement;
 }
 declare global {
     interface HTMLBtButtonElementEventMap {
@@ -98,7 +103,19 @@ declare global {
         prototype: HTMLBtStepperElement;
         new (): HTMLBtStepperElement;
     };
+    interface HTMLBtTableElementEventMap {
+        "selection": { [key: string]: any };
+        "pagination": { [key: string]: any };
+    }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtTableElementEventMap>(type: K, listener: (this: HTMLBtTableElement, ev: BtTableCustomEvent<HTMLBtTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtTableElementEventMap>(type: K, listener: (this: HTMLBtTableElement, ev: BtTableCustomEvent<HTMLBtTableElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLBtTableElement: {
         prototype: HTMLBtTableElement;
@@ -136,6 +153,8 @@ declare namespace LocalJSX {
     }
     interface BtTable {
         "headers"?: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
+        "onPagination"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
+        "onSelection"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
         "pageSize"?: number;
         "rows"?: { [key: string]: any }[];
     }

@@ -7,6 +7,13 @@
   --primary-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
   --primary-color: white;
 
+  --secondary-hue: 206.1; 
+  --secondary-saturation: 100%;
+  --secondary-lightness: 39.2%;
+
+  --secondary-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
+  --secondary-color: white;
+  
   /* default~(verde) */
   --success-hue: 142.4;
   --success-saturation: 71.8%;

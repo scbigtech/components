@@ -11,8 +11,8 @@
       :root {
         --primary-hue: 352.8;
         --primary-lightness: 43.9%;
-        --success-hue: 213.8;
-        --success-lightness: 25.1%;
+        --secondary-hue: 213.8;
+        --secondary-lightness: 25.1%;
       }
 
       body{
@@ -37,7 +37,7 @@
   </head>
   <body>
     <div class="container">
-      <bt-table id="table" page-size="50" isEditable></bt-table>
+      <bt-table id="table" page-size="5" isEditable></bt-table>
       <div class="box">
         <bt-stepper class="bigmat-stepper">
           <bt-step-item id="step0">
@@ -99,10 +99,31 @@
           { Name: 'Maria', Age: '25', Actions: '<bt-button>Ver</bt-button>' },
           { Name: 'Carlos', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
           { Name: 'Oscar', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Sebastian', Age: '<strong>30</strong>', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Maria', Age: '25', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Carlos', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Oscar', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Sebastian', Age: '<strong>30</strong>', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Maria', Age: '25', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Carlos', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Oscar', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Sebastian', Age: '<strong>30</strong>', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Maria', Age: '25', Actions: '<bt-button>Ver</bt-button>' },
+          { Name: 'Carlos', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
+          { Name: 'Oscar', Age: '35', Actions: "<bt-button>Ver</bt-button>" },
         ];
         table.onCellAction((row, key) => {
           console.log(`Cell clicked in column ${key}:`, row);
         });
+
+        table.addEventListener("selection", event => {
+          table.getAllSelected().then(selectedRows => {
+            console.log({ selectedRows });
+          })
+        })
+        table.addEventListener("pagination", event => {
+          console.log({ event });
+        })
         // #endregion
       });
     </script>
