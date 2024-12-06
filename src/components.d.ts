@@ -27,11 +27,21 @@ export namespace Components {
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
     }
     interface BtTable {
-        "getAllSelected": () => Promise<{ [key: string]: any; }[]>;
+        "config": { [key: string]: any };
+        /**
+          * Returns a promise that resolves to an array of all rows that are currently selected.
+          * @returns A promise that resolves to an array of all selected rows.
+         */
+        "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
         "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
+        /**
+          * Sets the cell action handler function. This function is called when a cell in the table is clicked. It is passed the row object and column key as arguments.
+          * @param handler The function to be called when a cell is clicked.
+         */
         "onCellAction": (handler: (row: { [key: string]: any; }, key: string) => void) => Promise<void>;
         "pageSize": number;
         "rows": { [key: string]: any }[];
+        "totalRows"?: number;
     }
 }
 export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
@@ -106,6 +116,8 @@ declare global {
     interface HTMLBtTableElementEventMap {
         "selection": { [key: string]: any };
         "pagination": { [key: string]: any };
+        "sort": { key: string; direction: 'asc' | 'desc' };
+        "filter": { filters: { [key: string]: string } };
     }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
         addEventListener<K extends keyof HTMLBtTableElementEventMap>(type: K, listener: (this: HTMLBtTableElement, ev: BtTableCustomEvent<HTMLBtTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -152,11 +164,15 @@ declare namespace LocalJSX {
         "onStep"?: (event: BtStepperCustomEvent<number>) => void;
     }
     interface BtTable {
+        "config"?: { [key: string]: any };
         "headers"?: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
+        "onFilter"?: (event: BtTableCustomEvent<{ filters: { [key: string]: string } }>) => void;
         "onPagination"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
         "onSelection"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
+        "onSort"?: (event: BtTableCustomEvent<{ key: string; direction: 'asc' | 'desc' }>) => void;
         "pageSize"?: number;
         "rows"?: { [key: string]: any }[];
+        "totalRows"?: number;
     }
     interface IntrinsicElements {
         "bt-button": BtButton;

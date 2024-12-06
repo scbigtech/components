@@ -1,5 +1,4 @@
-import { Component, Prop, State, Method, h, Event, EventEmitter } from '@stencil/core';
-import { emit } from 'process';
+import { Component, Event, EventEmitter, Method, Prop, State, Watch, h } from '@stencil/core';
 
 @Component({
   tag: 'bt-table',
@@ -10,6 +9,11 @@ export class BtTable {
   @Prop() headers: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[] = [];
   @Prop() rows: { [key: string]: any }[] = [];
   @Prop() pageSize: number = 5;
+  @Prop() totalRows?: number;
+  @Prop() config: { [key: string]: any } = {
+    next: { label: 'Next', },
+    prev: { label: 'Previous', }
+  };
 
   @State() filteredRows: { [key: string]: any }[] = [];
   @State() searchText: string = '';
@@ -17,15 +21,106 @@ export class BtTable {
   @State() currentPage: number = 1;
   @State() columnFilters: { [key: string]: string } = {};
   @State() selectedRows: Set<number> = new Set();
+  @State() totalPages: number = 1;
+  @State() _totalRows: number = 0;
 
   @Event({ eventName: 'selection' }) rowSelect: EventEmitter<{ [key: string]: any }>;
   @Event() pagination: EventEmitter<{ [key: string]: any }>;
+  @Event() sort: EventEmitter<{ key: string; direction: 'asc' | 'desc' }>;
+  @Event() filter: EventEmitter<{ filters: { [key: string]: string } }>;
+
+  /**
+   * Watches for changes to the rows property and updates the filtered rows.
+   * If the rows property is invalid, it will log an error to the console.
+   * @private
+   */
+  @Watch('rows')
+  onRowsChange() {
+    this.updateRows();
+  }
+
+  /**
+  * Sets the cell action handler function.
+  * This function is called when a cell in the table is clicked.
+  * It is passed the row object and column key as arguments.
+  * @param handler The function to be called when a cell is clicked.
+  */
+  @Method()
+  async onCellAction(handler: (row: { [key: string]: any }, key: string) => void) {
+    this.cellActionHandler = handler;
+  }
+
+
+  /**
+  * Returns a promise that resolves to an array of all rows that are currently selected.
+  * @returns A promise that resolves to an array of all selected rows.
+  */
+  @Method()
+  async getAllSelectedRows() {
+    return this.rows.filter((_, index) => this.selectedRows.has(index));
+  }
 
   private cellActionHandler: (row: { [key: string]: any }, key: string) => void;
-
+  /**
+ * Calls the cellActionHandler function (if defined) with the row object and column key as arguments.
+ * This function is called internally by the table when a cell is clicked.
+ * @param row The row object containing the cell that was clicked.
+ * @param key The key of the column in which the cell was clicked.
+ */
+  emitCellAction(row: { [key: string]: any }, key: string) {
+    if (this.cellActionHandler) {
+      this.cellActionHandler(row, key);
+    }
+  }
   componentWillLoad() {
-    this.filteredRows = [...this.rows];
     this.initializeFilters();
+  }
+
+  /**
+   * Updates the filteredRows state by cloning the rows property.
+   * If the rows property is invalid, it will log an error to the console
+   * and do nothing.
+   * @private
+   */
+  private updateRows() {
+
+    if (!this.validateRows()) {
+      console.error('Invalid rows. Each row must match the keys defined in headers.');
+      return;
+    }
+    if (this.totalRows === undefined) {
+      this._totalRows = this.rows.length;
+    } else {
+      this._totalRows = this.totalRows;
+    }
+    this.filteredRows = [...this.rows];
+  }
+
+  /**
+   * Validates the rows property and returns a boolean indicating whether
+   * it is valid.
+   *
+   * A valid rows property is an array of objects, where each object has
+   * all the keys defined in the headers property. If a key is missing,
+   * it will be assigned a default value of undefined.
+   *
+   * @returns {boolean} True if the rows property is valid, false otherwise.
+   */
+  private validateRows(): boolean {
+    if (!this.rows || !Array.isArray(this.rows)) {
+      console.warn('rows is invalid or not set:', this.rows);
+      return false
+    }
+    const headerKeys = this.headers.map(header => header.key);
+    return this.rows.every(row => {
+      headerKeys.forEach(key => {
+        if (!(key in row)) {
+          row[key] = undefined;
+        }
+      });
+      return true;
+    });
+
   }
 
   /**
@@ -75,6 +170,7 @@ export class BtTable {
     const direction = this.sortConfig.key === header && this.sortConfig.direction === 'asc' ? 'desc' : 'asc';
     this.sortConfig = { key: header, direction };
     this.applyFilters();
+    this.sort.emit(this.sortConfig);
   }
 
   /**
@@ -91,6 +187,7 @@ export class BtTable {
     const input = event.target as HTMLInputElement;
     this.columnFilters = { ...this.columnFilters, [header]: input.value.toLowerCase() };
     this.applyFilters();
+    this.filter.emit({ filters: this.columnFilters });
   }
 
   /**
@@ -127,39 +224,6 @@ export class BtTable {
 
     this.filteredRows = rows;
     this.currentPage = 1; // Reset to the first page after applying filters
-  }
-
-  /**
-   * Updates the current page of the table to the given page number and emits a
-   * pagination event with the new page number.
-   * @param newPage The new page number
-   */
-  handlePageChange(newPage: number) {
-    this.currentPage = newPage;
-    this.pagination.emit({ page: newPage });
-  }
-
-  @Method()
-  /**
-   * Sets the cell action handler function.
-   * This function is called when a cell in the table is clicked.
-   * It is passed the row object and column key as arguments.
-   * @param handler The function to be called when a cell is clicked.
-   */
-  async onCellAction(handler: (row: { [key: string]: any }, key: string) => void) {
-    this.cellActionHandler = handler;
-  }
-
-  /**
-   * Calls the cellActionHandler function (if defined) with the row object and column key as arguments.
-   * This function is called internally by the table when a cell is clicked.
-   * @param row The row object containing the cell that was clicked.
-   * @param key The key of the column in which the cell was clicked.
-   */
-  emitCellAction(row: { [key: string]: any }, key: string) {
-    if (this.cellActionHandler) {
-      this.cellActionHandler(row, key);
-    }
   }
 
   /**
@@ -212,13 +276,14 @@ export class BtTable {
     return visibleRows.every((_, index) => this.selectedRows.has(start + index));
   }
 
-  @Method()
   /**
-   * Returns a promise that resolves to an array of all rows that are currently selected.
-   * @returns A promise that resolves to an array of all selected rows.
-   */
-  async getAllSelected() {
-    return this.rows.filter((_, index) => this.selectedRows.has(index));
+ * Updates the current page of the table to the given page number and emits a
+ * pagination event with the new page number.
+ * @param newPage The new page number
+ */
+  handlePageChange(newPage: number) {
+    this.currentPage = newPage;
+    this.pagination.emit({ page: newPage, pageSize: this.pageSize });
   }
 
   /**
@@ -229,6 +294,8 @@ export class BtTable {
   get paginatedRows() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
+    //Al estar sobreescribiendo this.rows en lugar de agregalos no obtengo el start y end de la paginacion. Siempre son 0 - page.size...
+    //Para data estatica funciona correctamente pero para data dinamica no
     return this.filteredRows.slice(start, end);
   }
 
@@ -239,49 +306,90 @@ export class BtTable {
    * @returns A JSX Element representing the pagination buttons.
    */
   renderPagination() {
-    const totalPages = Math.ceil(this.filteredRows.length / this.pageSize);
+    const totalPages = Math.ceil(this._totalRows / this.pageSize);
+    const start = (this.currentPage - 1) * this.pageSize + 1;
+    const end = Math.min(start + this.pageSize - 1, this._totalRows);
     return (
-      <div class="pagination">
-        <bt-button disabled={this.currentPage === 1} onClick={() => this.handlePageChange(this.currentPage - 1)}>
-          Previous
-        </bt-button>
-        {[...Array(totalPages)].map((_, index) => (
-          <bt-button class={this.currentPage === index + 1 ? 'active' : ''} onClick={() => this.handlePageChange(index + 1)}>
-            {index + 1}
+      <footer class="pagination">
+        <div class="pagination-info">
+          <span>Mostrando {start} - {end} de {this._totalRows} filas</span>
+        </div>
+        <div class="pagination-buttons">
+          <bt-button disabled={this.currentPage === 1} onClick={() => this.handlePageChange(this.currentPage - 1)}>
+            <svg slot="icon-left" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg>
+            <span>{this.config.prev.label}</span>
           </bt-button>
-        ))}
-        <bt-button disabled={this.currentPage === totalPages} onClick={() => this.handlePageChange(this.currentPage + 1)}>
-          Next
-        </bt-button>
-      </div>
+          {this.filteredRows.length > 0 && [...Array(totalPages)]
+            .map((_, i) => i + 1)
+            .slice(
+              Math.max(this.currentPage - 2, 0),
+              Math.min(this.currentPage + 1, totalPages)
+            )
+            .map((page) => (
+              <bt-button
+                class={this.currentPage === page ? 'active' : ''}
+                onClick={() => this.handlePageChange(page)}
+              >
+                {page}
+              </bt-button>
+            ))}
+          <bt-button disabled={this.currentPage === totalPages} onClick={() => this.handlePageChange(this.currentPage + 1)}>
+            <span>{this.config.next.label}</span>
+            <svg slot="icon-right" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
+          </bt-button>
+        </div>
+      </footer>
     );
+  }
+
+  /**
+ * Handles changes in the rows per page selector, updates the page size,
+ * and resets the current page to the first page.
+ * @param event The input event from the rows per page selector.
+ */
+  handlePageSizeChange(event: Event) {
+    const input = event.target as HTMLSelectElement;
+    this.pageSize = parseInt(input.value, 10);
+    this.currentPage = 1;
   }
 
   render() {
     return (
-      <div class="table-container">
+      <section class="table-container">
         {/* Search */}
-        <div class="search-container">
-          <span>
-            <input type="text" placeholder="Search..." value={this.searchText} onInput={this.handleSearch.bind(this)} />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-              <path d="M21 21l-6 -6" />
-            </svg>
-          </span>
-        </div>
+        <header class="toolbar">
+          <search class="search-container">
+            <div>
+              <input type="text" placeholder="Search..." value={this.searchText} onInput={this.handleSearch.bind(this)} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                <path d="M21 21l-6 -6" />
+              </svg>
+            </div>
+          </search>
+          <label class="page-size-selector">
+            <span>Page Size</span>
+            <select onInput={this.handlePageSizeChange.bind(this)}>
+              <option value="" disabled>{this.pageSize}</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+        </header>
 
         {/* Table */}
         <table>
@@ -330,7 +438,7 @@ export class BtTable {
 
         {/* Pagination */}
         {this.renderPagination()}
-      </div>
+      </section>
     );
   }
 }

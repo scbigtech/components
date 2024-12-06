@@ -1,18 +1,30 @@
-.search-container{
+:host {
+  --space: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space);
+}
+
+.search-container {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
 }
-.search-container span {
+
+.search-container div {
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .search-container input {
   width: auto;
-  padding: 8px;
-  padding-right: 28px;
+  padding: .5rem;
+  padding-right: 2.5rem;
   border: 0;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -25,7 +37,30 @@
   transform: translateY(-50%) scale(0.8);
   width: 24px;
   height: 24px;
+  opacity: .5;
 }
+
+.page-size-selector {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space);
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.page-size-selector select {
+  appearance: none;
+  border: none;
+  padding: 2px var(--space);
+}
+
+.page-size-selector select:hover {
+  cursor: pointer;
+  background: #f2f2f2;
+}
+
+
 
 .table-container {
   overflow-x: auto;
@@ -47,7 +82,8 @@ td {
 th {
   background-color: #f2f2f2;
 }
-th > div {
+
+th>div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -58,7 +94,7 @@ tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-th  input {
+th input {
   width: auto;
   padding: 8px;
   border: 0;
@@ -68,12 +104,22 @@ th  input {
 
 .pagination {
   display: flex;
-  justify-content: center;
-  margin-top: 10px;
-  gap: 5px;
+  justify-content: space-between;
 }
 
-.pagination .active{
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination .active {
   filter: brightness(0.9);
   --button-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
 }
