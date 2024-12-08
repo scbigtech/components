@@ -43,7 +43,8 @@
 
 <body>
   <div class="container">
-    <bt-table id="table" page-size="5" isEditable></bt-table>
+    <bt-table id="table1" class="hidden" page-size="10" is-async="true"></bt-table>
+    <bt-table id="table2" page-size="5"></bt-table>
     <div class="box hidden">
       <bt-stepper class="bigmat-stepper">
         <bt-step-item id="step0">
@@ -67,7 +68,7 @@
     </div>
   </div>
 
-  <script type="module">
+  <!-- <script type="module">
     window.addEventListener('load', () => {
       // #region Stepper
       const stepper = document.querySelector('.bigmat-stepper');
@@ -95,54 +96,119 @@
       });
       // #endregion
     });
-  </script>
+  </script> -->
 
-  <script type="module">
-    async function fakeFetch(url, options = { page: 1, pageSize: 5 }) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const { data } = await import('/assets/mock/table.js');
-      const startIndex = (options.page - 1) * options.pageSize;
-      const endIndex = options.page * options.pageSize;
-      return {
-        data: data.slice(startIndex, endIndex),
-        total: data.length,
-        ok: true,
+  <!-- <script type="module">
+    import { debounce } from './build/index.esm.js';
+
+    async function fakeFetch(url, options = { page: 1, pageSize: 5, searchText: '' }) {
+      // Capa de caché
+      const cacheKey = JSON.stringify({ url, ...options });
+      if (cache[cacheKey]) {
+        return cache[cacheKey];
       }
+      // Simular retraso
+      await new Promise(resolve => setTimeout(resolve, Math.random * 1000));
+
+      const { data } = await import(url);
+      let filteredData = data;
+
+      // Filtrar por términos de búsqueda si es necesario
+      if (options.searchText) {
+        const searchText = options.searchText.toLowerCase();
+        filteredData = data && data.filter(item =>
+          Object.values(item).some(value =>
+            value?.toString().toLowerCase().includes(searchText) || false
+          )
+        );
+      }
+
+      const total = filteredData.length;
+      const page = Math.max(1, options.page || 1);
+      const pageSize = Math.max(1, options.pageSize || 5);
+
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = page * pageSize;
+
+      const result = {
+        data: filteredData.slice(startIndex, Math.min(endIndex, total)),
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+        hasNextPage: endIndex < total,
+        hasPrevPage: page > 1,
+        ok: true,
+      };
+
+      // Almacenar en caché
+      cache[cacheKey] = result;
+      return result;
     }
 
-    window.addEventListener('load', async () => {
+    // Caché en memoria
+    const cache = {};
 
+    window.addEventListener('load', async () => {
       // #region Table
-      const table = document.getElementById('table');
+      const table = document.getElementById('table1');
       table.headers = [
-        { key: 'Name', label: 'Name', sortable: true, filterable: true },
-        { key: 'Age', label: 'Age', sortable: true, filterable: true },
-        { key: 'Job', label: 'Job', sortable: true, filterable: true },
-        { key: 'Actions', label: 'Actions', action: true },
+        { key: 'name', label: 'Name', sortable: true },
+        { key: 'age', label: 'Age', sortable: true },
+        { key: 'job', label: 'Job', sortable: true },
       ];
 
-      const { data, total } = await fakeFetch('/api/table');
+      const { data, total } = await fakeFetch('/assets/mock/table.js', { page: 1, pageSize: table.pageSize });
 
       table.totalRows = total;
       table.rows = [...data];
 
+      const debouncedFakeFetch = debounce(async (event) => {
+        const { page, pageSize, searchText } = event.detail;
+        console.log({ page, pageSize, searchText });
+        const { data, total } = await fakeFetch('/assets/mock/table.js', { page, pageSize, searchText });
+        table.totalRows = total;
+
+        const filteredData = [...table.rows];
+        data.forEach(row => {
+          if (filteredData.findIndex(r => r.id === row.id) === -1) {
+            filteredData.push(row);
+          }
+        });
+        table.rows = filteredData;
+        if (searchText && searchText.length > 2) await table.applyAsyncSearch();
+      }, 200);
+
       table.onCellAction((row, key) => {
         console.log(`Cell clicked in column ${key}:`, row);
       });
-      table.addEventListener("selection", event => {
-        table.getAllSelectedRows().then(selectedRows => {
-          console.log({ selectedRows });
-        })
-      })
-      table.addEventListener("pagination", async (event) => {
-        const { page, pageSize } = event.detail;
-        const { data, total } = await fakeFetch('/api/table', { page, pageSize });
-        table.totalRows = total;
-        table.rows = [...data];
-      })
+
+      table.addEventListener("selection", async () => {
+        const selectedRows = await table.getAllSelectedRows();
+        // console.log("Selected rows:", selectedRows);
+      });
+
+      table.addEventListener("pagination", debouncedFakeFetch);
+      table.addEventListener("search", debouncedFakeFetch);
+      // #endregion
+    });
+  </script> -->
+
+  <script type="module">
+    import { data } from '/assets/mock/table.js';
+    window.addEventListener('load', () => {
+      // #region Table
+      const table = document.getElementById('table2');
+      table.headers = [
+        { key: 'name', label: 'Name', sortable: true },
+        { key: 'age', label: 'Age', sortable: true },
+        { key: 'job', label: 'Job', sortable: true },
+      ];
+
+      table.rows = [...data];
       // #endregion
     });
   </script>
+
 </body>
 
 </html>

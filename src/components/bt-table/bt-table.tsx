@@ -8,6 +8,7 @@ import { Component, Event, EventEmitter, Method, Prop, State, Watch, h } from '@
 export class BtTable {
   @Prop() headers: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[] = [];
   @Prop() rows: { [key: string]: any }[] = [];
+  @Prop() isAsync: boolean = false;
   @Prop() pageSize: number = 5;
   @Prop() totalRows?: number;
   @Prop() config: { [key: string]: any } = {
@@ -20,11 +21,13 @@ export class BtTable {
   @State() sortConfig: { key: string; direction: 'asc' | 'desc' } = { key: '', direction: 'asc' };
   @State() currentPage: number = 1;
   @State() columnFilters: { [key: string]: string } = {};
-  @State() selectedRows: Set<number> = new Set();
+  @State() selectedRows: Set<string> = new Set();
   @State() totalPages: number = 1;
-  @State() _totalRows: number = 0;
+  @State() internalTotalRows: number = 0;
 
+  @Event() search: EventEmitter<{ searchText: string }>;
   @Event({ eventName: 'selection' }) rowSelect: EventEmitter<{ [key: string]: any }>;
+  @Event({ eventName: 'page-size' }) pageSizeChange: EventEmitter<{ [key: string]: any }>;
   @Event() pagination: EventEmitter<{ [key: string]: any }>;
   @Event() sort: EventEmitter<{ key: string; direction: 'asc' | 'desc' }>;
   @Event() filter: EventEmitter<{ filters: { [key: string]: string } }>;
@@ -57,7 +60,21 @@ export class BtTable {
   */
   @Method()
   async getAllSelectedRows() {
-    return this.rows.filter((_, index) => this.selectedRows.has(index));
+    return this.rows.filter(row => this.selectedRows.has(row.id));
+  }
+
+  /**
+ * Applies filters and sorting to the rows data based on the current search text,
+ * column-specific filters, and sort configuration, but only if the table is in
+ * async mode. If the table is not in async mode, it does nothing.
+ */
+  @Method()
+  async applyAsyncSearch() {
+    if (this.isAsync) this.applyFilters();
+    else {
+      console.warn("The 'applyAsyncSearch' method can only be called when the 'isAsync' property is set to true.");
+      return null;
+    }
   }
 
   private cellActionHandler: (row: { [key: string]: any }, key: string) => void;
@@ -78,7 +95,7 @@ export class BtTable {
 
   /**
    * Updates the filteredRows state by cloning the rows property.
-   * If the rows property is invalid, it will log an error to the console
+   * If the rows property is invalid, it will log an error
    * and do nothing.
    * @private
    */
@@ -89,10 +106,11 @@ export class BtTable {
       return;
     }
     if (this.totalRows === undefined) {
-      this._totalRows = this.rows.length;
+      this.internalTotalRows = this.rows.length;
     } else {
-      this._totalRows = this.totalRows;
+      this.internalTotalRows = this.totalRows;
     }
+
     this.filteredRows = [...this.rows];
   }
 
@@ -140,18 +158,20 @@ export class BtTable {
   }
 
   /**
-   * Handles the search input event to filter table rows.
+   * Handles the search input change event.
    *
-   * This function is triggered when the search input value changes.
-   * It updates the `searchText` state with the lowercase value of the input,
-   * then applies the current filters to update the displayed rows.
+   * This function is triggered whenever the user types something in the search input.
+   * It updates the `searchText` state with the current input value (lowercased) and
+   * applies the filters if the table is not in async mode.
+   * It then emits a search event with the current search text as the detail.
    *
-   * @param event The input event from the search field.
+   * @param event The event object from the search input change event.
    */
   handleSearch(event: Event) {
     const input = event.target as HTMLInputElement;
     this.searchText = input.value.toLowerCase();
-    this.applyFilters();
+    if (!this.isAsync) this.applyFilters();
+    this.search.emit({ searchText: this.searchText });
   }
 
   /**
@@ -221,7 +241,6 @@ export class BtTable {
         return 0;
       });
     }
-
     this.filteredRows = rows;
     this.currentPage = 1; // Reset to the first page after applying filters
   }
@@ -230,16 +249,17 @@ export class BtTable {
    * Handles row selection, either adding or removing the row from the selectedRows set, and emits the rowSelect event.
    * @param index The index of the row to select or deselect.
    */
-  handleRowSelection(index: number) {
+  handleRowSelection(id: string) {
     const selected = new Set(this.selectedRows);
-    if (selected.has(index)) {
-      selected.delete(index);
+    if (selected.has(id)) {
+      selected.delete(id);
     } else {
-      selected.add(index);
+      selected.add(id);
     }
     this.selectedRows = selected;
 
-    this.rowSelect.emit({ row: this.rows[index], index });
+    const selectedRow = this.rows.find(row => row.id === id);
+    this.rowSelect.emit({ row: selectedRow, id });
   }
 
   /**
@@ -248,21 +268,19 @@ export class BtTable {
    * If not all visible rows are selected, it will select them all.
    */
   handleSelectAll() {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    const visibleRows = this.filteredRows.slice(start, end);
-
+    const visibleRows = this.paginatedRows.map(row => row.id); // Obtener los IDs de las filas visibles
     const selected = new Set(this.selectedRows);
-    if (this.isAllSelected()) {
-      // Si ya están todas seleccionadas, eliminarlas
-      visibleRows.forEach((_, index) => selected.delete(start + index));
-    } else {
-      // Agregar todas las visibles
-      visibleRows.forEach((_, index) => selected.add(start + index));
-    }
-    this.selectedRows = selected;
 
-    this.rowSelect.emit({ selectedRows: this.selectedRows });
+    if (this.isAllSelected()) {
+      // Si todas están seleccionadas, deseleccionarlas
+      visibleRows.forEach(id => selected.delete(id));
+    } else {
+      // Si no todas están seleccionadas, seleccionarlas
+      visibleRows.forEach(id => selected.add(id));
+    }
+
+    this.selectedRows = selected;
+    this.rowSelect.emit({ selectedRows: [...this.selectedRows] });
   }
 
   /**
@@ -270,10 +288,9 @@ export class BtTable {
    * @returns Whether all visible rows are selected.
    */
   isAllSelected() {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    const visibleRows = this.filteredRows.slice(start, end);
-    return visibleRows.every((_, index) => this.selectedRows.has(start + index));
+    if (this.filteredRows.length === 0) return false;
+    const visibleRows = this.paginatedRows.map(row => row.id);
+    return visibleRows.every(id => this.selectedRows.has(id));
   }
 
   /**
@@ -293,9 +310,7 @@ export class BtTable {
    */
   get paginatedRows() {
     const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    //Al estar sobreescribiendo this.rows en lugar de agregalos no obtengo el start y end de la paginacion. Siempre son 0 - page.size...
-    //Para data estatica funciona correctamente pero para data dinamica no
+    const end = Math.min((start + 1) + this.pageSize - 1, this.internalTotalRows);
     return this.filteredRows.slice(start, end);
   }
 
@@ -306,34 +321,47 @@ export class BtTable {
    * @returns A JSX Element representing the pagination buttons.
    */
   renderPagination() {
-    const totalPages = Math.ceil(this._totalRows / this.pageSize);
+    const totalPages = Math.ceil(this.internalTotalRows / this.pageSize);
     const start = (this.currentPage - 1) * this.pageSize + 1;
-    const end = Math.min(start + this.pageSize - 1, this._totalRows);
+    const end = Math.min(start + this.pageSize - 1, this.internalTotalRows);
     return (
       <footer class="pagination">
         <div class="pagination-info">
-          <span>Mostrando {start} - {end} de {this._totalRows} filas</span>
+          <span>Mostrando {start} - {end} de {this.internalTotalRows} filas</span>
         </div>
         <div class="pagination-buttons">
-          <bt-button disabled={this.currentPage === 1} onClick={() => this.handlePageChange(this.currentPage - 1)}>
+          <bt-button hideText disabled={this.currentPage === 1} onClick={() => this.handlePageChange(this.currentPage - 1)}>
             <svg slot="icon-left" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 6l-6 6l6 6" /></svg>
             <span>{this.config.prev.label}</span>
           </bt-button>
-          {this.filteredRows.length > 0 && [...Array(totalPages)]
-            .map((_, i) => i + 1)
-            .slice(
-              Math.max(this.currentPage - 2, 0),
-              Math.min(this.currentPage + 1, totalPages)
-            )
-            .map((page) => (
+          {this.filteredRows.length > 0 && totalPages > 1 && (() => {
+            const pages = [];
+            if (totalPages <= 3) {
+              // Menos de 3 páginas: mostrar todas
+              for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+              }
+            } else if (this.currentPage === 1) {
+              // Primera página
+              pages.push(1, 2, 3);
+            } else if (this.currentPage === totalPages) {
+              // Última página
+              pages.push(totalPages - 2, totalPages - 1, totalPages);
+            } else {
+              // Página intermedia
+              pages.push(this.currentPage - 1, this.currentPage, this.currentPage + 1);
+            }
+
+            return pages.map((page) => (
               <bt-button
                 class={this.currentPage === page ? 'active' : ''}
                 onClick={() => this.handlePageChange(page)}
               >
                 {page}
               </bt-button>
-            ))}
-          <bt-button disabled={this.currentPage === totalPages} onClick={() => this.handlePageChange(this.currentPage + 1)}>
+            ));
+          })()}
+          <bt-button hideText disabled={this.currentPage === totalPages} onClick={() => this.handlePageChange(this.currentPage + 1)}>
             <span>{this.config.next.label}</span>
             <svg slot="icon-right" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
           </bt-button>
@@ -351,9 +379,19 @@ export class BtTable {
     const input = event.target as HTMLSelectElement;
     this.pageSize = parseInt(input.value, 10);
     this.currentPage = 1;
+    this.pageSizeChange.emit({ pageSize: this.pageSize });
   }
 
   render() {
+    if (this.rows.length === 0) {
+      return (
+        <section class="table-container">
+          <div class="table-empty">
+            <p>No se encontraron datos</p>
+          </div>
+        </section>
+      );
+    }
     return (
       <section class="table-container">
         {/* Search */}
@@ -382,7 +420,7 @@ export class BtTable {
           <label class="page-size-selector">
             <span>Page Size</span>
             <select onInput={this.handlePageSizeChange.bind(this)}>
-              <option value="" disabled>{this.pageSize}</option>
+              <option value="" disabled selected>{this.pageSize}</option>
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="20">20</option>
@@ -395,7 +433,7 @@ export class BtTable {
         <table>
           <thead>
             <tr>
-              <th>
+              <th style={{ width: '0' }}>
                 <input type="checkbox" checked={this.isAllSelected()} onChange={() => this.handleSelectAll()} />
               </th>
               {this.headers.map(header => (
@@ -419,17 +457,19 @@ export class BtTable {
             </tr>
           </thead>
           <tbody>
-            {this.paginatedRows.map((row, index) => (
+            {this.paginatedRows.map(row => (
               <tr>
                 <td>
                   <input
                     type="checkbox"
-                    checked={this.selectedRows.has((this.currentPage - 1) * this.pageSize + index)}
-                    onChange={() => this.handleRowSelection((this.currentPage - 1) * this.pageSize + index)}
+                    checked={this.selectedRows.has(row.id)}
+                    onChange={() => this.handleRowSelection(row.id)}
                   />
                 </td>
                 {this.headers.map(header =>
-                  header.action ? <td onClick={() => this.emitCellAction(row, header.key)} innerHTML={row[header.key]}></td> : <td innerHTML={row[header.key]}></td>,
+                  header.action
+                    ? <td onClick={() => this.emitCellAction(row, header.key)} innerHTML={row[header.key] ? row[header.key] : '-'}></td>
+                    : <td innerHTML={row[header.key] ? row[header.key] : '-'}></td>,
                 )}
               </tr>
             ))}

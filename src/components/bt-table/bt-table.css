@@ -71,6 +71,7 @@ table {
   border-collapse: collapse;
   margin-bottom: 10px;
   text-align: left;
+  counter-reset: rowNumber;
 }
 
 th,
@@ -92,6 +93,10 @@ th>div {
 
 tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+
+tr {
+  position: relative;
 }
 
 th input {
