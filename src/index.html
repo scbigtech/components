@@ -7,14 +7,13 @@
   <title>Stencil Component Starter</title>
   <link rel="stylesheet" href="/build/components.css" />
   <script type="module" src="/build/components.esm.js"></script>
-  <!-- <script nomodule src="/build/components.js"></script> -->
   <style>
-    :root {
+    /* :root {
       --primary-hue: 352.8;
       --primary-lightness: 43.9%;
       --secondary-hue: 213.8;
       --secondary-lightness: 25.1%;
-    }
+    } */
 
     body {
       font-size: 16px;
@@ -43,9 +42,9 @@
 
 <body>
   <div class="container">
-    <bt-table id="table1" class="hidden" page-size="10" is-async="true"></bt-table>
+    <!-- <bt-table id="table1" page-size="10" is-async="true"></bt-table> -->
     <bt-table id="table2" page-size="5"></bt-table>
-    <div class="box hidden">
+    <!-- <div class="box hidden">
       <bt-stepper class="bigmat-stepper">
         <bt-step-item id="step0">
           Step 1
@@ -65,7 +64,7 @@
         </bt-step-item>
         <bt-step-item> </bt-step-item>
       </bt-stepper>
-    </div>
+    </div> -->
   </div>
 
   <!-- <script type="module">
@@ -205,6 +204,13 @@
       ];
 
       table.rows = [...data];
+
+      table.addEventListener("selection", async (event) => {
+        console.log("Filas seleccionadas:", event.detail);
+      });
+      table.addEventListener("search", async (event) => {
+        console.log("Búsqueda:", event.detail);
+      });
       // #endregion
     });
   </script>

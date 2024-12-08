@@ -1,19 +1,18 @@
 :root {
   /* default ~(azul) */
-  --primary-hue: 206.1; 
+  --primary-hue: 206.1;
   --primary-saturation: 100%;
   --primary-lightness: 39.2%;
 
   --primary-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
   --primary-color: white;
 
-  --secondary-hue: 206.1; 
+  --secondary-hue: 205.9;
   --secondary-saturation: 100%;
-  --secondary-lightness: 39.2%;
-
+  --secondary-lightness: 17.3%;
   --secondary-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
   --secondary-color: white;
-  
+
   /* default~(verde) */
   --success-hue: 142.4;
   --success-saturation: 71.8%;

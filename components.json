@@ -1,5 +1,5 @@
 {
-  "timestamp": "2024-12-08T16:35:34",
+  "timestamp": "2024-12-08T22:27:23",
   "compiler": {
     "name": "@stencil/core",
     "version": "4.22.3",
@@ -368,7 +368,7 @@
           "reflectToAttr": false,
           "docs": "",
           "docsTags": [],
-          "default": "{\n    next: { label: 'Next', },\n    prev: { label: 'Previous', }\n  }",
+          "default": "{\n    next: { label: 'Next', },\n    prev: { label: 'Previous', },\n    emptyData: { label: 'No data', },\n    loading: { label: 'Loading...', },\n    error: { label: 'Error', },\n    pagesize: { label: 'Rows per page', },\n    page: { label: 'Page', },\n    rows: { label: 'Rows', },\n    select: { label: 'Select', },\n    selectall: { label: 'Select all' },\n    search: { label: 'Search' },\n    sort: { label: 'Sort' },\n    filter: { label: 'Filter' },\n  }",
           "values": [
             {
               "type": "{ [key: string]: any; }"
@@ -487,6 +487,28 @@
       ],
       "methods": [
         {
+          "name": "applyAsyncSearch",
+          "returns": {
+            "type": "Promise<any>",
+            "docs": ""
+          },
+          "complexType": {
+            "signature": "() => Promise<any>",
+            "parameters": [],
+            "references": {
+              "Promise": {
+                "location": "global",
+                "id": "global::Promise"
+              }
+            },
+            "return": "Promise<any>"
+          },
+          "signature": "applyAsyncSearch() => Promise<any>",
+          "parameters": [],
+          "docs": "Applies filters and sorting to the rows data based on the current search text,\ncolumn-specific filters, and sort configuration, but only if the table is in\nasync mode. If the table is not in async mode, it does nothing.",
+          "docsTags": []
+        },
+        {
           "name": "getAllSelectedRows",
           "returns": {
             "type": "Promise<{ [key: string]: any; }[]>",
@@ -569,12 +591,40 @@
           "docsTags": []
         },
         {
+          "event": "page-size",
+          "detail": "{ [key: string]: any; }",
+          "bubbles": true,
+          "complexType": {
+            "original": "{ [key: string]: any }",
+            "resolved": "{ [key: string]: any; }",
+            "references": {}
+          },
+          "cancelable": true,
+          "composed": true,
+          "docs": "",
+          "docsTags": []
+        },
+        {
           "event": "pagination",
           "detail": "{ [key: string]: any; }",
           "bubbles": true,
           "complexType": {
             "original": "{ [key: string]: any }",
             "resolved": "{ [key: string]: any; }",
+            "references": {}
+          },
+          "cancelable": true,
+          "composed": true,
+          "docs": "",
+          "docsTags": []
+        },
+        {
+          "event": "search",
+          "detail": "{ searchText: string; }",
+          "bubbles": true,
+          "complexType": {
+            "original": "{ searchText: string }",
+            "resolved": "{ searchText: string; }",
             "references": {}
           },
           "cancelable": true,

@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Method, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, Method, Prop, State, Watch, h } from '@stencil/core';
 
 @Component({
   tag: 'bt-table',
@@ -13,7 +13,18 @@ export class BtTable {
   @Prop() totalRows?: number;
   @Prop() config: { [key: string]: any } = {
     next: { label: 'Next', },
-    prev: { label: 'Previous', }
+    prev: { label: 'Previous', },
+    emptyData: { label: 'No data', },
+    loading: { label: 'Loading...', },
+    error: { label: 'Error', },
+    pagesize: { label: 'Rows per page', },
+    page: { label: 'Page', },
+    rows: { label: 'Rows', },
+    select: { label: 'Select', },
+    selectall: { label: 'Select all' },
+    search: { label: 'Search' },
+    sort: { label: 'Sort' },
+    filter: { label: 'Filter' },
   };
 
   @State() filteredRows: { [key: string]: any }[] = [];
@@ -259,7 +270,7 @@ export class BtTable {
     this.selectedRows = selected;
 
     const selectedRow = this.rows.find(row => row.id === id);
-    this.rowSelect.emit({ row: selectedRow, id });
+    this.rowSelect.emit(selectedRow);
   }
 
   /**
@@ -267,9 +278,10 @@ export class BtTable {
    * If all visible rows are already selected, it will deselect them.
    * If not all visible rows are selected, it will select them all.
    */
-  handleSelectAll() {
+  async handleSelectAll() {
     const visibleRows = this.paginatedRows.map(row => row.id); // Obtener los IDs de las filas visibles
     const selected = new Set(this.selectedRows);
+    console.log(visibleRows)
 
     if (this.isAllSelected()) {
       // Si todas están seleccionadas, deseleccionarlas
@@ -280,7 +292,7 @@ export class BtTable {
     }
 
     this.selectedRows = selected;
-    this.rowSelect.emit({ selectedRows: [...this.selectedRows] });
+    this.rowSelect.emit(await this.getAllSelectedRows());
   }
 
   /**
@@ -327,7 +339,7 @@ export class BtTable {
     return (
       <footer class="pagination">
         <div class="pagination-info">
-          <span>Mostrando {start} - {end} de {this.internalTotalRows} filas</span>
+          <span>{this.config.page.label} {start} - {end} ({this.internalTotalRows} {this.config.rows.label})</span>
         </div>
         <div class="pagination-buttons">
           <bt-button hideText disabled={this.currentPage === 1} onClick={() => this.handlePageChange(this.currentPage - 1)}>
@@ -387,7 +399,8 @@ export class BtTable {
       return (
         <section class="table-container">
           <div class="table-empty">
-            <p>No se encontraron datos</p>
+            <p>{this.config.emptyData.label}</p>
+            <img src='/assets/img/empty-data.svg' alt="no data" width={300} height={300} />
           </div>
         </section>
       );
@@ -398,7 +411,7 @@ export class BtTable {
         <header class="toolbar">
           <search class="search-container">
             <div>
-              <input type="text" placeholder="Search..." value={this.searchText} onInput={this.handleSearch.bind(this)} />
+              <input type="text" placeholder={this.config.search.label} value={this.searchText} onInput={this.handleSearch.bind(this)} />
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -418,7 +431,7 @@ export class BtTable {
             </div>
           </search>
           <label class="page-size-selector">
-            <span>Page Size</span>
+            <span>{this.config.pagesize.label}</span>
             <select onInput={this.handlePageSizeChange.bind(this)}>
               <option value="" disabled selected>{this.pageSize}</option>
               <option value="5">5</option>
@@ -434,7 +447,8 @@ export class BtTable {
           <thead>
             <tr>
               <th style={{ width: '0' }}>
-                <input type="checkbox" checked={this.isAllSelected()} onChange={() => this.handleSelectAll()} />
+                <label class="sr-only" htmlFor="select-all">{this.config.selectall.label}</label>
+                <input id="select-all" class="select-checkbox" type="checkbox" checked={this.isAllSelected()} onChange={() => this.handleSelectAll()} />
               </th>
               {this.headers.map(header => (
                 <th>
@@ -444,12 +458,16 @@ export class BtTable {
                       {this.sortConfig.key === header.key && <span>{this.sortConfig.direction === 'asc' ? ' ▲' : ' ▼'}</span>}
                     </span>
                     {header.filterable && (
-                      <input
-                        type="text"
-                        placeholder={`Filter ${header.label}`}
-                        value={this.columnFilters[header.key]}
-                        onInput={event => this.handleColumnFilterChange(header.key, event)}
-                      />
+                      <Fragment>
+                        <label class="sr-only" htmlFor="column-filter">{`${this.config.filter.label} ${header.label}`}</label>
+                        <input
+                          id='column-filter'
+                          type="text"
+                          placeholder={`${this.config.filter.label} ${header.label}`}
+                          value={this.columnFilters[header.key]}
+                          onInput={event => this.handleColumnFilterChange(header.key, event)}
+                        />
+                      </Fragment>
                     )}
                   </div>
                 </th>
@@ -460,7 +478,9 @@ export class BtTable {
             {this.paginatedRows.map(row => (
               <tr>
                 <td>
+                  <label class="sr-only">{this.config.select.label}</label>
                   <input
+                    class="select-checkbox"
                     type="checkbox"
                     checked={this.selectedRows.has(row.id)}
                     onChange={() => this.handleRowSelection(row.id)}

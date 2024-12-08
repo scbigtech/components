@@ -58,7 +58,7 @@ export class btButton {
       <button disabled={this.disabled || this.loading} class={buttonClass} onClick={() => this.handleClick()}>
         <span class="button__content">
           <slot name="icon-left"></slot>
-          <span class={`button__text ${this.hideText ? 'hidden' : ''}`}>
+          <span class={`button__text ${this.hideText ? 'sr-only' : ''}`}>
             <slot></slot>
           </span>
           <slot name="icon-right"></slot>
