@@ -2,16 +2,18 @@ import { Component, Event, EventEmitter, Fragment, Method, Prop, State, Watch, h
 
 @Component({
   tag: 'bt-table',
-  styleUrl: 'bt-table.css',
+  styleUrl: 'bt-table.scss',
   shadow: true,
 })
 export class BtTable {
   @Prop() headers: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[] = [];
   @Prop() rows: { [key: string]: any }[] = [];
+  @Prop() actions: { [key: string]: (row: { [key: string]: any; }) => void } = {};
   @Prop() isAsync: boolean = false;
   @Prop() pageSize: number = 5;
   @Prop() totalRows?: number;
   @Prop() config: { [key: string]: any } = {
+    caption: { label: 'Data table', },
     next: { label: 'Next', },
     prev: { label: 'Previous', },
     emptyData: { label: 'No data', },
@@ -25,6 +27,7 @@ export class BtTable {
     search: { label: 'Search' },
     sort: { label: 'Sort' },
     filter: { label: 'Filter' },
+    actions: { label: 'Actions', },
   };
 
   @State() filteredRows: { [key: string]: any }[] = [];
@@ -42,6 +45,8 @@ export class BtTable {
   @Event() pagination: EventEmitter<{ [key: string]: any }>;
   @Event() sort: EventEmitter<{ key: string; direction: 'asc' | 'desc' }>;
   @Event() filter: EventEmitter<{ filters: { [key: string]: string } }>;
+  @Event({ eventName: 'action' }) onCellAction: EventEmitter<{ row: { [key: string]: any }, action: string }>;
+  @Event({ eventName: 'edit' }) cellEdit: EventEmitter<{ row: { [key: string]: any } }>;
 
   /**
    * Watches for changes to the rows property and updates the filtered rows.
@@ -52,18 +57,6 @@ export class BtTable {
   onRowsChange() {
     this.updateRows();
   }
-
-  /**
-  * Sets the cell action handler function.
-  * This function is called when a cell in the table is clicked.
-  * It is passed the row object and column key as arguments.
-  * @param handler The function to be called when a cell is clicked.
-  */
-  @Method()
-  async onCellAction(handler: (row: { [key: string]: any }, key: string) => void) {
-    this.cellActionHandler = handler;
-  }
-
 
   /**
   * Returns a promise that resolves to an array of all rows that are currently selected.
@@ -88,28 +81,20 @@ export class BtTable {
     }
   }
 
-  private cellActionHandler: (row: { [key: string]: any }, key: string) => void;
-  /**
- * Calls the cellActionHandler function (if defined) with the row object and column key as arguments.
- * This function is called internally by the table when a cell is clicked.
- * @param row The row object containing the cell that was clicked.
- * @param key The key of the column in which the cell was clicked.
- */
-  emitCellAction(row: { [key: string]: any }, key: string) {
-    if (this.cellActionHandler) {
-      this.cellActionHandler(row, key);
+  emitCellAction(row: { [key: string]: any }, action: any) {
+    if (this.actions[action]["handler"]) {
+      this.actions[action]["handler"](row);
+      this.onCellAction.emit({ row, action });
+    } else {
+      console.warn(`No handler found for action: ${action}`);
     }
+
   }
+
   componentWillLoad() {
     this.initializeFilters();
   }
 
-  /**
-   * Updates the filteredRows state by cloning the rows property.
-   * If the rows property is invalid, it will log an error
-   * and do nothing.
-   * @private
-   */
   private updateRows() {
 
     if (!this.validateRows()) {
@@ -125,16 +110,6 @@ export class BtTable {
     this.filteredRows = [...this.rows];
   }
 
-  /**
-   * Validates the rows property and returns a boolean indicating whether
-   * it is valid.
-   *
-   * A valid rows property is an array of objects, where each object has
-   * all the keys defined in the headers property. If a key is missing,
-   * it will be assigned a default value of undefined.
-   *
-   * @returns {boolean} True if the rows property is valid, false otherwise.
-   */
   private validateRows(): boolean {
     if (!this.rows || !Array.isArray(this.rows)) {
       console.warn('rows is invalid or not set:', this.rows);
@@ -151,15 +126,6 @@ export class BtTable {
     });
 
   }
-
-  /**
-   * Initializes the column filters based on the headers configuration.
-   *
-   * This function iterates over the table headers and creates an initial
-   * filter object for each header that is marked as filterable. The filter
-   * object is stored in the `columnFilters` state, with each key representing
-   * the header key and the value initialized to an empty string.
-   */
   initializeFilters() {
     const filters: { [key: string]: string } = {};
     this.headers.forEach(header => {
@@ -168,16 +134,6 @@ export class BtTable {
     this.columnFilters = filters;
   }
 
-  /**
-   * Handles the search input change event.
-   *
-   * This function is triggered whenever the user types something in the search input.
-   * It updates the `searchText` state with the current input value (lowercased) and
-   * applies the filters if the table is not in async mode.
-   * It then emits a search event with the current search text as the detail.
-   *
-   * @param event The event object from the search input change event.
-   */
   handleSearch(event: Event) {
     const input = event.target as HTMLInputElement;
     this.searchText = input.value.toLowerCase();
@@ -185,16 +141,6 @@ export class BtTable {
     this.search.emit({ searchText: this.searchText });
   }
 
-  /**
-   * Sorts the table rows based on the specified column header.
-   *
-   * This function checks if the specified header is sortable. If it is,
-   * it toggles the sort direction between ascending ('asc') and descending ('desc')
-   * based on the current sort configuration. It then updates the sort configuration
-   * and reapplies the filters to sort the displayed rows.
-   *
-   * @param header The key of the column to sort by.
-   */
   handleSort(header: string) {
     if (!this.headers.find(h => h.key === header && h.sortable)) return;
 
@@ -204,16 +150,6 @@ export class BtTable {
     this.sort.emit(this.sortConfig);
   }
 
-  /**
-   * Updates the column filter for a specified header and applies the filters.
-   *
-   * This function is triggered when a filter input changes for a specific column.
-   * It updates the `columnFilters` state with the new filter value for the specified
-   * header and then applies all current filters to update the displayed rows.
-   *
-   * @param header The key of the column to apply the filter to.
-   * @param event The input change event containing the new filter value.
-   */
   handleColumnFilterChange(header: string, event: Event) {
     const input = event.target as HTMLInputElement;
     this.columnFilters = { ...this.columnFilters, [header]: input.value.toLowerCase() };
@@ -221,11 +157,6 @@ export class BtTable {
     this.filter.emit({ filters: this.columnFilters });
   }
 
-  /**
-   * Applies filters and sorting to the rows data based on the current search text,
-   * column-specific filters, and sort configuration. Updates the filteredRows state
-   * and resets the current page to the first page after applying filters.
-   */
   applyFilters() {
     let rows = [...this.rows];
 
@@ -256,10 +187,6 @@ export class BtTable {
     this.currentPage = 1; // Reset to the first page after applying filters
   }
 
-  /**
-   * Handles row selection, either adding or removing the row from the selectedRows set, and emits the rowSelect event.
-   * @param index The index of the row to select or deselect.
-   */
   handleRowSelection(id: string) {
     const selected = new Set(this.selectedRows);
     if (selected.has(id)) {
@@ -273,15 +200,9 @@ export class BtTable {
     this.rowSelect.emit(selectedRow);
   }
 
-  /**
-   * Selects or deselects all visible rows in the current page.
-   * If all visible rows are already selected, it will deselect them.
-   * If not all visible rows are selected, it will select them all.
-   */
   async handleSelectAll() {
-    const visibleRows = this.paginatedRows.map(row => row.id); // Obtener los IDs de las filas visibles
+    const visibleRows = this.paginatedRows.map(row => row.id);
     const selected = new Set(this.selectedRows);
-    console.log(visibleRows)
 
     if (this.isAllSelected()) {
       // Si todas están seleccionadas, deseleccionarlas
@@ -295,43 +216,23 @@ export class BtTable {
     this.rowSelect.emit(await this.getAllSelectedRows());
   }
 
-  /**
-   * Returns true if all visible rows in the current page are selected.
-   * @returns Whether all visible rows are selected.
-   */
   isAllSelected() {
     if (this.filteredRows.length === 0) return false;
     const visibleRows = this.paginatedRows.map(row => row.id);
     return visibleRows.every(id => this.selectedRows.has(id));
   }
 
-  /**
- * Updates the current page of the table to the given page number and emits a
- * pagination event with the new page number.
- * @param newPage The new page number
- */
   handlePageChange(newPage: number) {
     this.currentPage = newPage;
     this.pagination.emit({ page: newPage, pageSize: this.pageSize });
   }
 
-  /**
-   * Returns a subset of the filtered rows, limited to the current page.
-   * The subset is determined by the current page and the page size.
-   * @returns An array of rows to be displayed in the current page.
-   */
   get paginatedRows() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = Math.min((start + 1) + this.pageSize - 1, this.internalTotalRows);
     return this.filteredRows.slice(start, end);
   }
 
-  /**
-   * Renders the pagination buttons for the table.
-   * The buttons are conditionally enabled/disabled based on the current page.
-   * The buttons are also given an active class if they match the current page.
-   * @returns A JSX Element representing the pagination buttons.
-   */
   renderPagination() {
     const totalPages = Math.ceil(this.internalTotalRows / this.pageSize);
     const start = (this.currentPage - 1) * this.pageSize + 1;
@@ -382,16 +283,17 @@ export class BtTable {
     );
   }
 
-  /**
- * Handles changes in the rows per page selector, updates the page size,
- * and resets the current page to the first page.
- * @param event The input event from the rows per page selector.
- */
   handlePageSizeChange(event: Event) {
     const input = event.target as HTMLSelectElement;
     this.pageSize = parseInt(input.value, 10);
     this.currentPage = 1;
     this.pageSizeChange.emit({ pageSize: this.pageSize });
+  }
+
+  handleCellEdit(row: { [key: string]: any; }, header: string, event: Event) {
+    const input = event.target as HTMLInputElement;
+    row[header] = input.textContent;
+    this.cellEdit.emit({ row });
   }
 
   render() {
@@ -407,6 +309,7 @@ export class BtTable {
     }
     return (
       <section class="table-container">
+        <h2 part='heading-1'>{this.config.caption.label}</h2>
         {/* Search */}
         <header class="toolbar">
           <search class="search-container">
@@ -443,58 +346,73 @@ export class BtTable {
         </header>
 
         {/* Table */}
-        <table>
-          <thead>
-            <tr>
-              <th style={{ width: '0' }}>
-                <label class="sr-only" htmlFor="select-all">{this.config.selectall.label}</label>
-                <input id="select-all" class="select-checkbox" type="checkbox" checked={this.isAllSelected()} onChange={() => this.handleSelectAll()} />
-              </th>
-              {this.headers.map(header => (
-                <th>
-                  <div>
-                    <span onClick={() => this.handleSort(header.key)}>
-                      {header.label}
-                      {this.sortConfig.key === header.key && <span>{this.sortConfig.direction === 'asc' ? ' ▲' : ' ▼'}</span>}
-                    </span>
-                    {header.filterable && (
-                      <Fragment>
-                        <label class="sr-only" htmlFor="column-filter">{`${this.config.filter.label} ${header.label}`}</label>
-                        <input
-                          id='column-filter'
-                          type="text"
-                          placeholder={`${this.config.filter.label} ${header.label}`}
-                          value={this.columnFilters[header.key]}
-                          onInput={event => this.handleColumnFilterChange(header.key, event)}
-                        />
-                      </Fragment>
-                    )}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {this.paginatedRows.map(row => (
+        <div class="table-wrapper">
+          <table>
+            <thead>
               <tr>
-                <td>
-                  <label class="sr-only">{this.config.select.label}</label>
-                  <input
-                    class="select-checkbox"
-                    type="checkbox"
-                    checked={this.selectedRows.has(row.id)}
-                    onChange={() => this.handleRowSelection(row.id)}
-                  />
-                </td>
-                {this.headers.map(header =>
-                  header.action
-                    ? <td onClick={() => this.emitCellAction(row, header.key)} innerHTML={row[header.key] ? row[header.key] : '-'}></td>
-                    : <td innerHTML={row[header.key] ? row[header.key] : '-'}></td>,
-                )}
+                <th style={{ width: '0' }}>
+                  <label class="sr-only" htmlFor="select-all">{this.config.selectall.label}</label>
+                  <input id="select-all" class="selection-checkbox" type="checkbox" checked={this.isAllSelected()} onChange={() => this.handleSelectAll()} />
+                </th>
+                {this.headers.map(header => (
+                  <th>
+                    <div>
+                      <span onClick={() => this.handleSort(header.key)}>
+                        {header.label}
+                        {this.sortConfig.key === header.key && <span>{this.sortConfig.direction === 'asc' ? ' ▲' : ' ▼'}</span>}
+                      </span>
+                      {header.filterable && (
+                        <Fragment>
+                          <label class="sr-only" htmlFor="column-filter">{`${this.config.filter.label} ${header.label}`}</label>
+                          <input
+                            id='column-filter'
+                            type="text"
+                            placeholder={`${this.config.filter.label} ${header.label}`}
+                            value={this.columnFilters[header.key]}
+                            onInput={event => this.handleColumnFilterChange(header.key, event)}
+                          />
+                        </Fragment>
+                      )}
+                    </div>
+                  </th>
+                ))}
+                {Object.keys(this.actions).length > 0 && <th style={{ width: '0' }}>
+                  <span>{this.config.actions.label}</span>
+                </th>}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {this.paginatedRows.map(row => (
+                <tr>
+                  <td>
+                    <label class="sr-only">{this.config.select.label}</label>
+                    <input
+                      class="selection-checkbox"
+                      type="checkbox"
+                      checked={this.selectedRows.has(row.id)}
+                      onChange={() => this.handleRowSelection(row.id)}
+                    />
+                  </td>
+                  {this.headers.map(header =>
+                    <td contentEditable onBlur={event => this.handleCellEdit(row, header.key, event)} innerHTML={row[header.key] ? row[header.key] : '-'}></td>,
+                  )}
+                  {Object.keys(this.actions).length > 0 && <td>
+                    <div class="actions">
+                      {Object.keys(this.actions).map(action => (
+                        <bt-button
+                          hideText
+                          class={`${this.actions[action]["class"]}`}
+                          onClick={() => this.emitCellAction(row, action)}>
+                          {this.actions[action]["label"] || action}
+                          <span slot='icon-right' innerHTML={this.actions[action]["icon"]}></span>
+                        </bt-button>))}
+                    </div>
+                  </td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         {/* Pagination */}
         {this.renderPagination()}

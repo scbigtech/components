@@ -3,7 +3,7 @@ import type { btButton } from '../bt-button/bt-button';
 
 @Component({
   tag: 'bt-stepper',
-  styleUrl: 'bt-stepper.css',
+  styleUrl: 'bt-stepper.scss',
   shadow: true,
 })
 export class BtStepper {

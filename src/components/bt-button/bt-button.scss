@@ -9,16 +9,28 @@
   --button-hover-lightness: calc(var(--button-lightness) - 10%);
   --button-hover-bg: hsl(var(--button-hue), var(--button-saturation), var(--button-hover-lightness));
 
-  --button-disabled-bg: hsl(var(--disabled-hue), var(--disabled-saturation), var(--disabled-lightness));
-  --button-success-bg: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
+  --button-disabled-bg: hsl(var(--disabled-hue, 0), var(--disabled-saturation, 0%), var(--disabled-lightness, 50%));
+  --button-success-bg: hsl(var(--success-hue, 142.4), var(--success-saturation, 71.8%), var(--success-lightness, 29.2%));
 
   --icon-size: 1em;
-  --spacing: 0.5em;
+  --spacing: 1rem;
   --rounded: 4px;
 }
 
 :host(.active) {
-  --button-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
+  --button-bg: hsl(var(--secondary-hue, 205.9), var(--secondary-saturation, 100%), var(--secondary-lightness, 17.3%));
+}
+
+:host(.danger) {
+  --button-bg: hsl(var(--danger-hue, 205.9), var(--danger-saturation, 100%), var(--danger-lightness, 17.3%));
+}
+
+:host(.success) {
+  --button-bg: hsl(var(--success-hue, 205.9), var(--success-saturation, 100%), var(--success-lightness, 17.3%));
+}
+
+:host(.small) {
+  --spacing: 0.25em;
 }
 
 .sr-only {
@@ -35,7 +47,7 @@
 
 
 button {
-  padding: 0.5em 0.75em;
+  padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 0.75);
   font-size: 1em;
   color: var(--button-color);
   background-color: var(--button-bg);
