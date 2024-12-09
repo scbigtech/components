@@ -1,4 +1,8 @@
 import { Config } from '@stencil/core';
+import { postcss } from '@stencil-community/postcss';
+import autoprefixer from 'autoprefixer';
+import postcssEnv from 'postcss-env-function';
+import { sass } from '@stencil/sass';
 
 export const config: Config = {
   namespace: 'components',
@@ -19,7 +23,16 @@ export const config: Config = {
     },
     {
       type: 'www',
-      serviceWorker: null, // disable service workers
+      serviceWorker: null,
     },
   ],
+  plugins: [
+    sass(),
+    postcss({
+      plugins: [
+        autoprefixer(),
+        postcssEnv()
+      ]
+    })
+  ]
 };

@@ -1,17 +1,13 @@
 :host {
-  width: 100%;
   display: block;
   font-family: Arial, sans-serif;
   border: 1px solid var(--stepper-border-color, #ddd);
   padding: 1em;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --main-hue: var(--primary-hue, 210); 
-  --main-saturation: var(--primary-saturation, 100%); 
-  --main-lightness: var(--primary-lightness, 50%); 
 
   /* Colores base */
-  --main-bg: hsl(var(--main-hue), var(--main-saturation), var(--main-lightness));
+  --main-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
   --completed-bg: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
   --invalid-bg: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
 

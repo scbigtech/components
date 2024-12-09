@@ -1,6 +1,7 @@
 dist/
 www/
 loader/
+src/assets/img/*
 
 *~
 *.sw[mnpcod]
