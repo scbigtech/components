@@ -2,7 +2,7 @@ import { Component, Prop, State, Event, EventEmitter, h } from '@stencil/core';
 
 @Component({
   tag: 'bt-button',
-  styleUrl: 'bt-button.css',
+  styleUrl: 'bt-button.scss',
   shadow: true,
 })
 export class btButton {
@@ -58,7 +58,7 @@ export class btButton {
       <button disabled={this.disabled || this.loading} class={buttonClass} onClick={() => this.handleClick()}>
         <span class="button__content">
           <slot name="icon-left"></slot>
-          <span class={`button__text ${this.hideText ? 'hidden' : ''}`}>
+          <span class={`button__text ${this.hideText ? 'sr-only' : ''}`}>
             <slot></slot>
           </span>
           <slot name="icon-right"></slot>

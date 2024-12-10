@@ -1,9 +1,9 @@
-import { Component, h, State, Element, Method, EventEmitter, Event, Fragment } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, h, Method, State } from '@stencil/core';
 import type { btButton } from '../bt-button/bt-button';
 
 @Component({
   tag: 'bt-stepper',
-  styleUrl: 'bt-stepper.css',
+  styleUrl: 'bt-stepper.scss',
   shadow: true,
 })
 export class BtStepper {

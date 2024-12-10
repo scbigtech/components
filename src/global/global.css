@@ -1,25 +1,37 @@
 :root {
-  /* default ~(azul) */
-  --primary-hue: 206.1; 
+  /* Color Tokens*/
+  --dark-hue: 0;
+  --dark-saturation: 0%;
+  --dark-lightness: 12.5%;
+
+  --light-hue: 0;
+  --light-saturation: 0%;
+  --light-lightness: 100%;
+
+  --gray-hue: 0;
+  --gray-saturation: 0%;
+  --gray-lightness: 50%;
+
+  --primary-hue: 206.1;
   --primary-saturation: 100%;
   --primary-lightness: 39.2%;
 
-  --primary-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
-  --primary-color: white;
-
-  --secondary-hue: 206.1; 
+  --secondary-hue: 205.9;
   --secondary-saturation: 100%;
-  --secondary-lightness: 39.2%;
+  --secondary-lightness: 17.3%;
 
-  --secondary-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
-  --secondary-color: white;
-  
-  /* default~(verde) */
   --success-hue: 142.4;
   --success-saturation: 71.8%;
   --success-lightness: 29.2%;
 
-  /* default~(rojo) */
+  --info-hue: 204.8;
+  --info-saturation: 100%;
+  --info-lightness: 52.5%;
+
+  --warning-hue: 43.1;
+  --warning-saturation: 100%;
+  --warning-lightness: 52.5%;
+
   --danger-hue: 0;
   --danger-saturation: 100%;
   --danger-lightness: 50%;
@@ -27,9 +39,81 @@
   --disabled-hue: 0;
   --disabled-saturation: 0%;
   --disabled-lightness: 50%;
+
+  --text-color-dark: hsl(var(--dark-hue), var(--dark-saturation), var(--dark-lightness));
+  --text-color-light: hsl(var(--light-hue), var(--light-saturation), var(--light-lightness));
+
+  --light-bg: hsl(var(--light-hue), var(--light-saturation), var(--light-lightness));
+  --light-color: var(--text-color-dark);
+
+  --dark-bg: hsl(var(--dark-hue), var(--dark-saturation), var(--dark-lightness));
+  --dark-color: var(--text-color-light);
+
+  --primary-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+  --primary-color: var(--text-color-light);
+
+  --secondary-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
+  --secondary-color: var(--text-color-light);
+
+  --success-bg: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
+  --success-color: var(--text-color-light);
+
+  --danger-bg: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
+  --danger-color: var(--text-color-light);
+
+  --disabled-bg: hsl(var(--disabled-hue), var(--disabled-saturation), var(--disabled-lightness));
+  --disabled-color: var(--text-color-light);
+
+  /* Font Tokens */
+  --font-size: 16px;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-weight: 400;
+  --line-height: 1.6;
+
+  /* Spacing Tokens */
+  --spacing: 1rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+
+  /* Shadow Tokens */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+  /* Border Tokens */
+  --border-radius: 4px;
+  --border-width: 1px;
+  --border-color: var;
+
+  /* Transition Tokens */
+  --transition: all 0.2s ease;
+
+  /* Icons */
+  --icon-size: 1.5rem;
+
+  /* Breakpoints */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
 }
 
 * {
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-family);
+}
+
+*::part(heading-1),
+*::part(heading-2),
+*::part(heading-3),
+*::part(heading-4),
+*::part(heading-5),
+*::part(heading-6) {
+  --line-height: 1.1;
+  --font-weight: 700;
+  font-weight: var(--font-weight);
+  line-height: var(--line-height);
+  margin-bottom: var(--spacing-sm);
 }

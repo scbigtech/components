@@ -27,11 +27,22 @@ export namespace Components {
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
     }
     interface BtTable {
-        "getAllSelected": () => Promise<{ [key: string]: any; }[]>;
+        "actions": { [key: string]: (row: { [key: string]: any; }) => void };
+        /**
+          * Applies filters and sorting to the rows data based on the current search text, column-specific filters, and sort configuration, but only if the table is in async mode. If the table is not in async mode, it does nothing.
+         */
+        "applyAsyncSearch": () => Promise<any>;
+        "config": { [key: string]: any };
+        /**
+          * Returns a promise that resolves to an array of all rows that are currently selected.
+          * @returns A promise that resolves to an array of all selected rows.
+         */
+        "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
         "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
-        "onCellAction": (handler: (row: { [key: string]: any; }, key: string) => void) => Promise<void>;
+        "isAsync": boolean;
         "pageSize": number;
         "rows": { [key: string]: any }[];
+        "totalRows"?: number;
     }
 }
 export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
@@ -104,8 +115,14 @@ declare global {
         new (): HTMLBtStepperElement;
     };
     interface HTMLBtTableElementEventMap {
+        "search": { searchText: string };
         "selection": { [key: string]: any };
+        "page-size": { [key: string]: any };
         "pagination": { [key: string]: any };
+        "sort": { key: string; direction: 'asc' | 'desc' };
+        "filter": { filters: { [key: string]: string } };
+        "action": { row: { [key: string]: any }, action: string };
+        "edit": { row: { [key: string]: any } };
     }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
         addEventListener<K extends keyof HTMLBtTableElementEventMap>(type: K, listener: (this: HTMLBtTableElement, ev: BtTableCustomEvent<HTMLBtTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -152,11 +169,21 @@ declare namespace LocalJSX {
         "onStep"?: (event: BtStepperCustomEvent<number>) => void;
     }
     interface BtTable {
+        "actions"?: { [key: string]: (row: { [key: string]: any; }) => void };
+        "config"?: { [key: string]: any };
         "headers"?: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
+        "isAsync"?: boolean;
+        "onAction"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }, action: string }>) => void;
+        "onEdit"?: (event: BtTableCustomEvent<{ row: { [key: string]: any } }>) => void;
+        "onFilter"?: (event: BtTableCustomEvent<{ filters: { [key: string]: string } }>) => void;
+        "onPage-size"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
         "onPagination"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
+        "onSearch"?: (event: BtTableCustomEvent<{ searchText: string }>) => void;
         "onSelection"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
+        "onSort"?: (event: BtTableCustomEvent<{ key: string; direction: 'asc' | 'desc' }>) => void;
         "pageSize"?: number;
         "rows"?: { [key: string]: any }[];
+        "totalRows"?: number;
     }
     interface IntrinsicElements {
         "bt-button": BtButton;
