@@ -1,51 +1,52 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-  <title>Stencil Component Starter</title>
-  <link rel="stylesheet" href="/build/components.css" />
-  <script type="module" src="/build/components.esm.js"></script>
-  <style>
-    /* :root {
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Stencil Component Starter</title>
+    <link rel="stylesheet" href="/build/components.css" />
+    <script type="module" src="/build/components.esm.js"></script>
+    <style>
+      /* :root {
       --primary-hue: 352.8;
       --primary-lightness: 43.9%;
       --secondary-hue: 213.8;
       --secondary-lightness: 25.1%;
     } */
 
-    body {
-      font-size: 16px;
-    }
+      body {
+        font-size: 16px;
+      }
 
-    .container {
-      min-height: 100vh;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 3rem;
-    }
+      .container {
+        min-height: 100vh;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
 
-    .box {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-    }
+      .box {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
 
-    .hidden {
-      display: none;
-    }
-  </style>
-</head>
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
 
-<body>
-  <div class="container">
-    <!-- <bt-table id="table1" page-size="10" is-async="true"></bt-table> -->
-    <bt-table id="table2" page-size="5" is-async="true"></bt-table>
-    <bt-button id="saveall" class="success">Guardar todos</bt-button>
-    <!-- <div class="box hidden">
+  <body>
+    <div class="container">
+      <!-- <bt-table id="table1" page-size="10" is-async="true"></bt-table> -->
+      <bt-table id="table2" page-size="5" is-async="true">
+        <bt-button id="saveall" class="success">Save</bt-button>
+      </bt-table>
+      
+      <!-- <div class="box hidden">
       <bt-stepper class="bigmat-stepper">
         <bt-step-item id="step0">
           Step 1
@@ -66,9 +67,9 @@
         <bt-step-item> </bt-step-item>
       </bt-stepper>
     </div> -->
-  </div>
+    </div>
 
-  <!-- <script type="module">
+    <!-- <script type="module">
     window.addEventListener('load', () => {
       // #region Stepper
       const stepper = document.querySelector('.bigmat-stepper');
@@ -98,110 +99,116 @@
     });
   </script> -->
 
-  <script type="module">
-    const cache = {};
-    async function getData(uri, params) {
-
-      const _params = new URLSearchParams(params).toString();
-      const query = `${uri}?${_params}`
-      if (cache[query]) {
-        return cache[query]
+    <script type="module">
+      const cache = {};
+      async function getData(uri, params) {
+        const _params = new URLSearchParams(params).toString();
+        const query = `${uri}?${_params}`;
+        if (cache[query]) {
+          return cache[query];
+        }
+        const data = await fetch(query);
+        const json = await data.json();
+        cache[query] = json;
+        return json;
       }
-      console.log(query)
-      const data = await fetch(query)
-      const json = await data.json()
-      cache[query] = json
-      return json
-    }
 
-    window.addEventListener('load', async () => {
-      // #region Table
-      const table = document.getElementById('table2');
-      const saveall = document.getElementById('saveall');
-      table.headers = [
-        { key: 'name', label: 'Name', sortable: true, },
-        { key: 'age', label: 'Age', sortable: true },
-        { key: 'job', label: 'Job', sortable: true },
-      ];
+      window.addEventListener('load', async () => {
+        // #region Table
+        const rows = await getData('http://localhost:3000/users', { _page: 1, _per_page: 5 });
+        console.log(rows);
+        if (!rows) return;
 
-      const rows = await getData('http://localhost:3000/users', { _page: 1, _per_page: 5 });
-      table.totalRows = rows.items;
-      table.rows = rows.data;
-      table.actions = {
-        delete: {
-          label: "Eliminar",
-          class: "danger",
-          icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path></svg>',
-          handler: (row) => {
-            table.rows = table.rows.filter(r => r.id !== row.id);
-          }
-        },
-        save: {
-          label: "Guardar",
-          class: "success",
-          icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2zM7 5h4v2h2V5h2v4H7V5zm0 8h10v6H7v-6z"></path></svg>',
-          handler: (row) => {
-            console.log(row);
-          }
-        },
-      };
+        const table = document.getElementById('table2');
+        const saveall = document.getElementById('saveall');
+        table.headers = [
+          { key: 'name', label: 'Name', sortable: true },
+          { key: 'age', label: 'Age', sortable: true },
+          { key: 'job', label: 'Job', sortable: true },
+        ];
+        setTimeout(() => {
+          table.totalRows = rows.items;
+          table.rows = [...rows.data];
+        }, 50);
 
-      table.addEventListener("pagination", async (event) => {
-        console.log("Paginación:", event.detail);
-        const rows = await getData('http://localhost:3000/users', { _page: event.detail.page, _per_page: event.detail.pageSize });
-        // table.totalRows = rows.items;
-        const existingElements = table.rows.map(row => row.id);
-        const newElements = rows.data.filter(row => !existingElements.includes(row.id));
-        table.rows = [...table.rows, ...newElements];
-      })
-
-      table.addEventListener("selection", async (event) => {
-        console.log("Filas seleccionadas:", event.detail);
-      });
-      table.addEventListener("search", async (event) => {
-        console.log("Búsqueda:", event.detail);
-      });
-      table.addEventListener("action", async (event) => {
-        console.log("Acción:", event.detail);
-        if (event.detail.action === "save") {
-          const row = event.detail.row;
-          const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
+        table.actions = {
+          delete: {
+            label: 'Eliminar',
+            class: 'danger',
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path></svg>',
+            handler: row => {
+              table.rows = table.rows.filter(r => r.id !== row.id);
             },
-            body: JSON.stringify(row)
-          })
-          const json = await updatedRow.json()
-          console.log(json);
-        }
-        if (event.detail.action === "delete") {
-          // llamado a api...
-        }
-      })
-      const editedRows = new Set();
-      table.addEventListener("edit", async (event) => {
-        const row = event.detail.row;
-        editedRows.add(row);
-        console.log("Edición:", event.detail);
-      })
-
-      saveall.addEventListener('click', async () => {
-        Array.from(editedRows).forEach(row => {
-          fetch(`http://localhost:3000/users/${row.id}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
+          },
+          save: {
+            label: 'Guardar',
+            class: 'success',
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2zM7 5h4v2h2V5h2v4H7V5zm0 8h10v6H7v-6z"></path></svg>',
+            handler: row => {
+              console.log(row);
             },
-            body: JSON.stringify(row)
-          })
-        })
-        editedRows.clear();
-      })
-      // #endregion
-    });
-  </script>
+          },
+        };
 
-</body>
+        table.addEventListener('pagination', async event => {
+          console.log('Paginación:', event.detail);
+          const paginatedRows = await getData('http://localhost:3000/users', { _page: event.detail.page, _per_page: event.detail.pageSize });
+          const existingElements = table.rows.map(row => row.id);
+          const newElements = paginatedRows.data.filter(row => !existingElements.includes(row.id));
+          table.rows = [...table.rows, ...newElements];
+        });
+        table.addEventListener('selection', async event => {
+          console.log('Filas seleccionadas:', event.detail);
+        });
+        table.addEventListener('search', async event => {
+          console.log('Búsqueda:', event.detail);
+          const searchRows = await getData('http://localhost:3000/users');
+          if (!searchRows) return;
+          const filteredRows = searchRows.filter(row => row.name.toLowerCase().includes(event.detail.searchText.toLowerCase()));
+          if (!filteredRows) return;
+          const nonexistingRows = filteredRows.filter(row => !table.rows.map(r => r.id).includes(row.id));
+          table.rows = [...table.rows, ...nonexistingRows];
+          table.applyAsyncSearch();
+        });
+        table.addEventListener('action', async event => {
+          console.log('Acción:', event.detail);
+          if (event.detail.action === 'save') {
+            const row = event.detail.row;
+            const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(row),
+            });
+            const json = await updatedRow.json();
+            console.log(json);
+          }
+          if (event.detail.action === 'delete') {
+            // llamado a api...
+          }
+        });
+        const editedRows = new Set();
+        table.addEventListener('edit', async event => {
+          const editedrow = event.detail.row;
+          editedRows.add(editedrow);
+          console.log('Edición:', event.detail);
+        });
 
+        saveall.addEventListener('click', async () => {
+          Array.from(editedRows).forEach(row => {
+            fetch(`http://localhost:3000/users/${row.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(row),
+            });
+          });
+          editedRows.clear();
+        });
+        // #endregion
+      });
+    </script>
+  </body>
 </html>

@@ -18,8 +18,7 @@ export const config: Config = {
       externalRuntime: false,
     },
     {
-      type: 'docs-json',
-      file: 'components.json',
+      type: 'docs-readme',
     },
     {
       type: 'www',

@@ -78,26 +78,20 @@
   --spacing-lg: 2rem;
 
   /* Shadow Tokens */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 2px 4px hsla(var(--dark-hue), var(--dark-saturation), var(--dark-lightness), 0.1);
+  --shadow-md: 0 4px 8px hsla(var(--dark-hue), var(--dark-saturation), var(--dark-lightness), 0.1);
+  --shadow-lg: 0 8px 16px hsla(var(--dark-hue), var(--dark-saturation), var(--dark-lightness), 0.1);
 
   /* Border Tokens */
   --border-radius: 4px;
   --border-width: 1px;
-  --border-color: var;
+  --border-color: hsl(var(--gray-hue), var(--gray-saturation), var(--gray-lightness));
 
   /* Transition Tokens */
   --transition: all 0.2s ease;
 
   /* Icons */
   --icon-size: 1.5rem;
-
-  /* Breakpoints */
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
 }
 
 * {

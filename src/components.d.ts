@@ -30,12 +30,15 @@ export namespace Components {
         "actions": { [key: string]: (row: { [key: string]: any; }) => void };
         /**
           * Applies filters and sorting to the rows data based on the current search text, column-specific filters, and sort configuration, but only if the table is in async mode. If the table is not in async mode, it does nothing.
+          * @returns A promise that resolves to the filtered rows.
+          * @example const btTable = document.querySelector('bt-table'); await btTable.applyAsyncSearch();
          */
         "applyAsyncSearch": () => Promise<any>;
         "config": { [key: string]: any };
         /**
-          * Returns a promise that resolves to an array of all rows that are currently selected.
+          * Returns a promise that resolves to an array of all rows that are currently selected. The promise resolves to an array of objects, where each object is a row in the table.
           * @returns A promise that resolves to an array of all selected rows.
+          * @example const btTable = document.querySelector('bt-table'); const selectedRows = await btTable.getAllSelectedRows();
          */
         "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
         "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];

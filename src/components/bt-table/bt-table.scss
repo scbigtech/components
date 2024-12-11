@@ -92,9 +92,9 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 10px;
   text-align: left;
   counter-reset: rowNumber;
+  margin-bottom: var(--space);
 }
 
 th,
@@ -134,6 +134,7 @@ th input[type="text"] {
 .pagination {
   display: flex;
   justify-content: space-between;
+  margin-bottom: var(--space);
 
   &-info {
     display: flex;
