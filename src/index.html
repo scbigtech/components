@@ -45,7 +45,7 @@
       <bt-table id="table2" page-size="5" is-async="true">
         <bt-button id="saveall" class="success">Save</bt-button>
       </bt-table>
-      
+
       <!-- <div class="box hidden">
       <bt-stepper class="bigmat-stepper">
         <bt-step-item id="step0">
@@ -115,7 +115,7 @@
 
       window.addEventListener('load', async () => {
         // #region Table
-        const rows = await getData('http://localhost:3000/users', { _page: 1, _per_page: 5 });
+        const rows = await getData('http://localhost:3000/users');
         console.log(rows);
         if (!rows) return;
 
@@ -124,11 +124,11 @@
         table.headers = [
           { key: 'name', label: 'Name', sortable: true },
           { key: 'age', label: 'Age', sortable: true },
-          { key: 'job', label: 'Job', sortable: true },
+          { key: 'address', label: 'Address', sortable: true },
         ];
         setTimeout(() => {
-          table.totalRows = rows.items;
-          table.rows = [...rows.data];
+          table.totalRows = rows.length;
+          table.rows = [...rows];
         }, 50);
 
         table.actions = {
@@ -172,21 +172,8 @@
         });
         table.addEventListener('action', async event => {
           console.log('Acción:', event.detail);
-          if (event.detail.action === 'save') {
-            const row = event.detail.row;
-            const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(row),
-            });
-            const json = await updatedRow.json();
-            console.log(json);
-          }
-          if (event.detail.action === 'delete') {
-            // llamado a api...
-          }
+          if (event.detail.action === 'save') onSave(event.detail.row);
+          if (event.detail.action === 'delete') onDelete(event.detail.row);
         });
         const editedRows = new Set();
         table.addEventListener('edit', async event => {
@@ -209,6 +196,21 @@
         });
         // #endregion
       });
+
+      async function onDelete(row) {
+        // llamado a api...
+      }
+      async function onSave(row) {
+        const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(row),
+        });
+        const json = await updatedRow.json();
+        console.log(json);
+      }
     </script>
   </body>
 </html>

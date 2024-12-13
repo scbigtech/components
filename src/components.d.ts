@@ -27,19 +27,9 @@ export namespace Components {
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
     }
     interface BtTable {
-        "actions": { [key: string]: (row: { [key: string]: any; }) => void };
-        /**
-          * Applies filters and sorting to the rows data based on the current search text, column-specific filters, and sort configuration, but only if the table is in async mode. If the table is not in async mode, it does nothing.
-          * @returns A promise that resolves to the filtered rows.
-          * @example const btTable = document.querySelector('bt-table'); await btTable.applyAsyncSearch();
-         */
+        "actions": { [key: string]: (row: { [key: string]: any }) => void };
         "applyAsyncSearch": () => Promise<any>;
         "config": { [key: string]: any };
-        /**
-          * Returns a promise that resolves to an array of all rows that are currently selected. The promise resolves to an array of objects, where each object is a row in the table.
-          * @returns A promise that resolves to an array of all selected rows.
-          * @example const btTable = document.querySelector('bt-table'); const selectedRows = await btTable.getAllSelectedRows();
-         */
         "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
         "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
         "isAsync": boolean;
@@ -124,7 +114,7 @@ declare global {
         "pagination": { [key: string]: any };
         "sort": { key: string; direction: 'asc' | 'desc' };
         "filter": { filters: { [key: string]: string } };
-        "action": { row: { [key: string]: any }, action: string };
+        "action": { row: { [key: string]: any }; action: string };
         "edit": { row: { [key: string]: any } };
     }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
@@ -172,11 +162,11 @@ declare namespace LocalJSX {
         "onStep"?: (event: BtStepperCustomEvent<number>) => void;
     }
     interface BtTable {
-        "actions"?: { [key: string]: (row: { [key: string]: any; }) => void };
+        "actions"?: { [key: string]: (row: { [key: string]: any }) => void };
         "config"?: { [key: string]: any };
         "headers"?: { key: string; label: string; sortable?: boolean; filterable?: boolean; action?: boolean }[];
         "isAsync"?: boolean;
-        "onAction"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }, action: string }>) => void;
+        "onAction"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }; action: string }>) => void;
         "onEdit"?: (event: BtTableCustomEvent<{ row: { [key: string]: any } }>) => void;
         "onFilter"?: (event: BtTableCustomEvent<{ filters: { [key: string]: string } }>) => void;
         "onPage-size"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;

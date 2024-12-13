@@ -27,6 +27,9 @@ export class btButton {
    */
   @Event() btButtonClick: EventEmitter<{ valid: boolean }>;
 
+  disconnectedCallback() {
+    
+  }
   private handleClick() {
     if (this.disabled || this.loading) return;
 
