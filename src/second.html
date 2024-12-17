@@ -45,10 +45,63 @@
 
   <body>
     <div class="container">
+      <!-- <bt-table id="table1" page-size="10" is-async="true"></bt-table> -->
       <bt-table id="table2" page-size="5" is-async="true">
         <bt-button id="saveall" class="success">Save</bt-button>
       </bt-table>
+
+      <!-- <div class="box hidden">
+      <bt-stepper class="bigmat-stepper">
+        <bt-step-item id="step0">
+          Step 1
+          <input type="checkbox" id="step0-check" />
+          <label for="step0-check">Accept</label>
+        </bt-step-item>
+        <bt-step-item id="step1">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula commodo magna, sed hendrerit ipsum
+            viverra varius. Proin posuere arcu ligula, eget tempus
+            sapien consequat nec. Aliquam at mauris nec purus finibus rutrum. Nunc tellus est, hendrerit et dapibus
+            condimentum, tincidunt at metus. Vivamus at iaculis elit. Nunc
+            quis consectetur velit. Pellentesque convallis justo lectus, quis volutpat elit bibendum in. Orci varius
+            natoque penatibus et magnis dis parturient montes, nascetur
+            ridiculus mus. Sed tincidunt ipsum mi, vel pretium nisi ornare nec.
+          </p>
+        </bt-step-item>
+        <bt-step-item> </bt-step-item>
+      </bt-stepper>
+    </div> -->
     </div>
+
+    <!-- <script type="module">
+    window.addEventListener('load', () => {
+      // #region Stepper
+      const stepper = document.querySelector('.bigmat-stepper');
+      const step1 = document.getElementById('step1');
+      const checkbox = document.getElementById('step0-check');
+
+      stepper.addEventListener('step', event => {
+        const index = event.detail;
+        if (index === 0) {
+          checkbox.addEventListener('change', () => {
+            const isValid = checkbox.checked;
+            stepper.setStepValidity(0, isValid);
+          });
+          stepper.setStepValidity(0, checkbox.checked);
+        }
+        if (index === 1) {
+          if (step1.loaded) return;
+          stepper.setStepValidity(1, false);
+          step1.task(async () => {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            step1.loaded = true;
+            stepper.setStepValidity(1, true);
+          });
+        }
+      });
+      // #endregion
+    });
+  </script> -->
 
     <script type="module">
       const cache = {};
@@ -64,23 +117,11 @@
         return json;
       }
 
-      function getPartners() {
-        return JSON.stringify([
-          { id: '1', name: 'Partner 1' },
-          { id: '2', name: 'Partner 2' },
-          { id: '3', name: 'Partner 3' },
-        ])
-      }
-
       function mapRows(rows) {
         return rows.map(row => {
           return {
-            id : row.id,
             name: row.name,
             age: row.age,
-            partner: `
-              <bt-combobox key="${row.id}-partner" options='${getPartners()}'></bt-combobox>
-            `,
             contact: `
             <ul class="contact">
               <li>${row.email}</li>
@@ -93,22 +134,19 @@
       window.addEventListener('load', async () => {
         // #region Table
         const rows = await getData('http://localhost:3000/users');
-        // console.log(rows);
+        console.log(rows);
         if (!rows) return;
 
         const table = document.getElementById('table2');
         const saveall = document.getElementById('saveall');
         table.headers = [
-          { key: 'name', label: 'Name', sortable: true, editable: true },
+          { key: 'name', label: 'Name', sortable: true },
           { key: 'age', label: 'Age', sortable: true },
-          { key: 'partner', label: 'Partner', filterable: true },
           { key: 'contact', label: 'Contact' },
         ];
         setTimeout(() => {
-          const mappedRows = mapRows(rows);
-          // console.log(mappedRows)
           table.totalRows = rows.length;
-          table.rows = [...mappedRows];
+          table.rows = [...mapRows(rows)];
         }, 50);
 
         table.actions = {
@@ -130,6 +168,13 @@
           },
         };
 
+        table.addEventListener('pagination', async event => {
+          console.log('Paginación:', event.detail);
+          const paginatedRows = await getData('http://localhost:3000/users', { _page: event.detail.page, _per_page: event.detail.pageSize });
+          const existingElements = table.rows.map(row => row.id);
+          const newElements = paginatedRows.data.filter(row => !existingElements.includes(row.id));
+          table.rows = [...table.rows, ...newElements];
+        });
         table.addEventListener('selection', async event => {
           console.log('Filas seleccionadas:', event.detail);
         });

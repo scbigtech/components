@@ -54,6 +54,8 @@
     "lit": "3.2.1",
     "postcss-env-function": "^7.0.0",
     "puppeteer": "^21.9.0",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "uuid": "^11.0.3",
     "vite": "^6.0.2"
   },
   "license": "MIT",
