@@ -22,6 +22,7 @@ export namespace Components {
      */
     interface BtCombobox {
         "options": string;
+        "selectedOptions": string;
     }
     interface BtStepItem {
         "loaded": boolean;
@@ -38,7 +39,7 @@ export namespace Components {
         "applyAsyncSearch": () => Promise<any>;
         "config": { [key: string]: any };
         "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
-        "headers": { key: string; label: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[];
+        "headers": { key: string; label: string; class: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[];
         "isAsync": boolean;
         "pageSize": number;
         "rows": { [key: string]: any }[];
@@ -84,7 +85,7 @@ declare global {
         new (): HTMLBtButtonElement;
     };
     interface HTMLBtComboboxElementEventMap {
-        "selectionChanged": Option[];
+        "comboboxSelectionChange": Option[];
     }
     /**
      * TODO: revisar este componente , asignarle un identificador unico
@@ -147,7 +148,7 @@ declare global {
         "sort": { key: string; direction: 'asc' | 'desc' | undefined };
         "filter": { filters: { [key: string]: string } };
         "action": { row: { [key: string]: any }; action: string };
-        "edit": { row: { [key: string]: any } };
+        "edit": { header: string, row: { [key: string]: any } };
     }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
         addEventListener<K extends keyof HTMLBtTableElementEventMap>(type: K, listener: (this: HTMLBtTableElement, ev: BtTableCustomEvent<HTMLBtTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -191,8 +192,9 @@ declare namespace LocalJSX {
      * para que las opciones seleccionadas solo afecten a este componente
      */
     interface BtCombobox {
-        "onSelectionChanged"?: (event: BtComboboxCustomEvent<Option[]>) => void;
+        "onComboboxSelectionChange"?: (event: BtComboboxCustomEvent<Option[]>) => void;
         "options"?: string;
+        "selectedOptions"?: string;
     }
     interface BtStepItem {
         "loaded"?: boolean;
@@ -205,10 +207,10 @@ declare namespace LocalJSX {
     interface BtTable {
         "actions"?: { [key: string]: (row: { [key: string]: any }) => void };
         "config"?: { [key: string]: any };
-        "headers"?: { key: string; label: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[];
+        "headers"?: { key: string; label: string; class: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[];
         "isAsync"?: boolean;
         "onAction"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }; action: string }>) => void;
-        "onEdit"?: (event: BtTableCustomEvent<{ row: { [key: string]: any } }>) => void;
+        "onEdit"?: (event: BtTableCustomEvent<{ header: string, row: { [key: string]: any } }>) => void;
         "onFilter"?: (event: BtTableCustomEvent<{ filters: { [key: string]: string } }>) => void;
         "onPage-size"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
         "onPagination"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;

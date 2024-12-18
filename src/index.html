@@ -69,17 +69,18 @@
           { id: '1', name: 'Partner 1' },
           { id: '2', name: 'Partner 2' },
           { id: '3', name: 'Partner 3' },
-        ])
+        ]);
       }
 
       function mapRows(rows) {
         return rows.map(row => {
           return {
-            id : row.id,
+            id: row.id,
             name: row.name,
             age: row.age,
+            company: row.company,
             partner: `
-              <bt-combobox key="${row.id}-partner" options='${getPartners()}'></bt-combobox>
+              <bt-combobox key="${row.id}-partner" options='${getPartners()}' selected-options='${JSON.stringify(row.partner || [])}'></bt-combobox>
             `,
             contact: `
             <ul class="contact">
@@ -89,6 +90,13 @@
             `,
           };
         });
+      }
+
+      async function updateRows(rows) {
+        const table = document.getElementById('table2');
+        const mappedRows = mapRows(rows);
+        table.totalRows = rows.length;
+        table.rows = [...mappedRows];
       }
       window.addEventListener('load', async () => {
         // #region Table
@@ -100,16 +108,13 @@
         const saveall = document.getElementById('saveall');
         table.headers = [
           { key: 'name', label: 'Name', sortable: true, editable: true },
-          { key: 'age', label: 'Age', sortable: true },
-          { key: 'partner', label: 'Partner', filterable: true },
+          { key: 'age', label: 'Age', sortable: true, class: 'w-50', editable: true },
+          { key: 'partner', label: 'Partner' },
+          { key: 'company', label: 'Company' },
           { key: 'contact', label: 'Contact' },
         ];
-        setTimeout(() => {
-          const mappedRows = mapRows(rows);
-          // console.log(mappedRows)
-          table.totalRows = rows.length;
-          table.rows = [...mappedRows];
-        }, 50);
+
+        await updateRows(rows);
 
         table.actions = {
           delete: {
@@ -130,6 +135,9 @@
           },
         };
 
+        const selectedRows = [];
+        const editedRows = new Set();
+
         table.addEventListener('selection', async event => {
           console.log('Filas seleccionadas:', event.detail);
         });
@@ -148,15 +156,31 @@
           if (event.detail.action === 'save') onSave(event.detail.row);
           if (event.detail.action === 'delete') onDelete(event.detail.row);
         });
-        const editedRows = new Set();
         table.addEventListener('edit', async event => {
-          const editedrow = event.detail.row;
+          const editedrow = event.detail;
           editedRows.add(editedrow);
           console.log('Edición:', event.detail);
         });
+        table.addEventListener('comboboxSelectionChange', async event => {
+          const selectedOptions = event.detail;
+          const affectedRow = event.composedPath().find(r => r.tagName === 'TR'); /*La fila que fue afectada*/
+          if (!affectedRow) return;
+          const row = rows.find(r => r.id === affectedRow.dataset.id);
+          if (!row) return;
+          row.partner = selectedOptions.map(o => {
+            return { id: o.id, name: o.name };
+          });
+
+          updateRows(rows);
+        });
 
         saveall.addEventListener('click', async () => {
-          Array.from(editedRows).forEach(row => {
+          const affectedRows = Array.from(editedRows);
+          if (!affectedRows) return;
+          affectedRows.forEach(ar => {
+            const row = rows.find(r => r.id === ar.row.id);
+            if (!row) return;
+            row[ar.header] = ar.row[ar.header];
             fetch(`http://localhost:3000/users/${row.id}`, {
               method: 'PUT',
               headers: {
@@ -165,7 +189,9 @@
               body: JSON.stringify(row),
             });
           });
+
           editedRows.clear();
+          updateRows(rows);
         });
         // #endregion
       });

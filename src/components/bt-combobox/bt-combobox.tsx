@@ -19,31 +19,31 @@ export class MultiSelectCombobox {
   private id: string = uuidv4();
 
   @Prop() options: string = '';
-  
+  @Prop() selectedOptions: string = '';  
   @State() _options: Option[] = []; // Lista de opciones disponibles
-  @State() selectedOptions: Option[] = []; // Lista de opciones seleccionadas
+  @State() _selectedOptions: Option[] = []; // Lista de opciones seleccionadas
   @State() isOpen: boolean = false; // Estado del desplegable
 
   @Element() el: HTMLElement;
 
-  @Event() selectionChanged: EventEmitter<Option[]>; // Evento para emitir cambios de selección
+  @Event({composed: true, bubbles: false, eventName: 'comboboxSelectionChange'}) selectionChange: EventEmitter<Option[]>; // Evento para emitir cambios de selección
 
-  toggleDropdown() {
+  private toggleDropdown() {
     this.isOpen = !this.isOpen;
   }
 
   componentWillLoad() {
     this._options = JSON.parse(this.options);
-    console.log(this.selectedOptions)
+    this._selectedOptions = JSON.parse(this.selectedOptions);
   }
 
-  selectOption(option: Option) {
-    if (this.selectedOptions.findIndex(item => item.id === option.id) !== -1) {
-      this.selectedOptions = this.selectedOptions.filter(item => item !== option);
+  private selectOption(option: Option) {
+    if (this._selectedOptions.findIndex(item => item.id === option.id) !== -1) {
+      this._selectedOptions = this._selectedOptions.filter(item => item !== option);
     } else {
-      this.selectedOptions = [...this.selectedOptions, option];
+      this._selectedOptions = [...this._selectedOptions, option];
     }
-    this.selectionChanged.emit(this.selectedOptions);
+    this.selectionChange.emit(this._selectedOptions);
   }
 
   @Listen('click', { target: 'window' })
@@ -60,7 +60,7 @@ export class MultiSelectCombobox {
       <div class="combobox-container" data-combobox-id={this.id}>
         <div class="selected-items" onClick={() => this.toggleDropdown()}>
           {this.selectedOptions.length > 0 ? (
-            this.selectedOptions.map(option => (
+            this._selectedOptions.map(option => (
               <span class="selected-item">{option.name}</span>
             ))
           ) : (
@@ -75,7 +75,7 @@ export class MultiSelectCombobox {
               <div
                 class={{ 
                   'dropdown-item': true, 
-                  'selected': this.selectedOptions.findIndex(item => item.id === option.id) !== -1
+                  'selected': this._selectedOptions.findIndex(item => item.id === option.id) !== -1
                 }}
                 onClick={() => this.selectOption(option)}
               >
