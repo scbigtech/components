@@ -1,6 +1,7 @@
-.combobox-container {
+.multiselect-container {
   position: relative;
   width: 100%;
+  max-width: 200px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-family: Arial, sans-serif;
@@ -26,6 +27,8 @@
 }
 
 .arrow {
+  background: none;
+  border: none;
   margin-left: auto;
   font-size: .8rem;
   transition: .2s;

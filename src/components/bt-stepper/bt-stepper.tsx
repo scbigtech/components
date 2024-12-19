@@ -198,12 +198,10 @@ export class BtStepper {
   render() {
     return (
       <section>
-        {this.renderIndicators()}
-        <div class="content">
-          <slot></slot>
-        </div>
+        
+        
         <div id="controls">
-          <bt-button id="prev" loading={this.asyncAction} disabled={this.currentStep === 0} onClick={() => this.changeStep(-1)}>
+          <bt-button id="prev" hideText loading={this.asyncAction} disabled={this.currentStep === 0} onClick={() => this.changeStep(-1)}>
             <svg
               slot="icon-left"
               xmlns="http://www.w3.org/2000/svg"
@@ -224,6 +222,7 @@ export class BtStepper {
             </svg>
             Back
           </bt-button>
+          {this.renderIndicators()}
           {this.currentStep < this.steps.length - 1 && (
             <bt-button
               id="next"
@@ -254,7 +253,7 @@ export class BtStepper {
             </bt-button>
           )}
           {this.currentStep === this.steps.length - 1 && (
-            <bt-button id="finish" success loading={this.asyncAction} disabled={!this.isStepValid(this.currentStep) || this.currentStep !== this.steps.length - 1}>
+            <bt-button id="finish" hideText success loading={this.asyncAction} disabled={!this.isStepValid(this.currentStep) || this.currentStep !== this.steps.length - 1}>
               Finish{' '}
               <svg
                 slot="icon-right"
@@ -274,6 +273,9 @@ export class BtStepper {
               </svg>
             </bt-button>
           )}
+        </div>
+        <div class="content">
+          <slot></slot>
         </div>
       </section>
     );

@@ -177,6 +177,10 @@ th input[type="text"] {
   outline: none;
   margin: 0;
 
+  &:focus {
+    outline: auto;
+  }
+
   &:checked::before {
     content: '✓';
     position: absolute;

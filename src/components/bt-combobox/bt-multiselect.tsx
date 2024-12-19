@@ -11,11 +11,11 @@ interface Option {
  */
 
 @Component({
-  tag: 'bt-combobox',
-  styleUrl: 'bt-combobox.scss',
+  tag: 'bt-multiselect',
+  styleUrl: 'bt-multiselect.scss',
   shadow: true,
 })
-export class MultiSelectCombobox {
+export class MultiSelectmultiselect {
   private id: string = uuidv4();
 
   @Prop() options: string = '';
@@ -26,7 +26,7 @@ export class MultiSelectCombobox {
 
   @Element() el: HTMLElement;
 
-  @Event({composed: true, bubbles: false, eventName: 'comboboxSelectionChange'}) selectionChange: EventEmitter<Option[]>; // Evento para emitir cambios de selección
+  @Event({composed: true, bubbles: true}) multiselectChange: EventEmitter<Option[]>; // Evento para emitir cambios de selección
 
   private toggleDropdown() {
     this.isOpen = !this.isOpen;
@@ -39,11 +39,11 @@ export class MultiSelectCombobox {
 
   private selectOption(option: Option) {
     if (this._selectedOptions.findIndex(item => item.id === option.id) !== -1) {
-      this._selectedOptions = this._selectedOptions.filter(item => item !== option);
+      this._selectedOptions = this._selectedOptions.filter(item => item.id !== option.id);
     } else {
       this._selectedOptions = [...this._selectedOptions, option];
     }
-    this.selectionChange.emit(this._selectedOptions);
+    this.multiselectChange.emit(this._selectedOptions);
   }
 
   @Listen('click', { target: 'window' })
@@ -57,7 +57,7 @@ export class MultiSelectCombobox {
 
   render() {
     return (
-      <div class="combobox-container" data-combobox-id={this.id}>
+      <div class="multiselect-container" data-multiselect-id={this.id}>
         <div class="selected-items" onClick={() => this.toggleDropdown()}>
           {this.selectedOptions.length > 0 ? (
             this._selectedOptions.map(option => (
@@ -66,7 +66,7 @@ export class MultiSelectCombobox {
           ) : (
             <span class="placeholder">Select options</span>
           )}
-          <span class={`arrow ${this.isOpen ? 'open' : ''}`}>▲</span>
+          <button class={`arrow ${this.isOpen ? 'open' : ''}`}>▲</button>
         </div>
 
         {this.isOpen && (

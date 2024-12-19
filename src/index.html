@@ -45,9 +45,24 @@
 
   <body>
     <div class="container">
-      <bt-table id="table2" page-size="5" is-async="true">
-        <bt-button id="saveall" class="success">Save</bt-button>
-      </bt-table>
+      <bt-stepper class="bigmat-stepper">
+        <bt-step-item id="step0">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula commodo magna, sed hendrerit ipsum viverra varius. Proin posuere arcu ligula, eget tempus sapien
+            consequat nec. Aliquam at mauris nec purus finibus rutrum. Nunc tellus est, hendrerit et dapibus condimentum, tincidunt at metus. Vivamus at iaculis elit. Nunc quis
+            consectetur velit. Pellentesque convallis justo lectus, quis volutpat elit bibendum in. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
+            ridiculus mus. Sed tincidunt ipsum mi, vel pretium nisi ornare nec.
+          </p>
+        </bt-step-item>
+        <bt-step-item id="step1">
+          <bt-table id="table2" page-size="5" is-async="true">
+            <bt-button id="saveall" class="success">Save</bt-button>
+          </bt-table>
+        </bt-step-item>
+        <bt-step-item id="step2">
+          <bt-table id="tableselected" page-size="5"></bt-table>
+        </bt-step-item>
+      </bt-stepper>
     </div>
 
     <script type="module">
@@ -80,7 +95,7 @@
             age: row.age,
             company: row.company,
             partner: `
-              <bt-combobox key="${row.id}-partner" options='${getPartners()}' selected-options='${JSON.stringify(row.partner || [])}'></bt-combobox>
+              <bt-multiselect key="${row.id}-partner" options='${getPartners()}' selected-options='${JSON.stringify(row.partner || [])}'></bt-multiselect>
             `,
             contact: `
             <ul class="contact">
@@ -92,8 +107,8 @@
         });
       }
 
-      async function updateRows(rows) {
-        const table = document.getElementById('table2');
+      async function updateRows(rows, tableid) {
+        const table = document.getElementById(tableid);
         const mappedRows = mapRows(rows);
         table.totalRows = rows.length;
         table.rows = [...mappedRows];
@@ -105,8 +120,10 @@
         if (!rows) return;
 
         const table = document.getElementById('table2');
+        const tableselected = document.getElementById('tableselected');
         const saveall = document.getElementById('saveall');
-        table.headers = [
+        const stepper = document.querySelector('bt-stepper');
+        const headers = [
           { key: 'name', label: 'Name', sortable: true, editable: true },
           { key: 'age', label: 'Age', sortable: true, class: 'w-50', editable: true },
           { key: 'partner', label: 'Partner' },
@@ -114,7 +131,10 @@
           { key: 'contact', label: 'Contact' },
         ];
 
-        await updateRows(rows);
+        table.headers = headers;
+        tableselected.headers  = headers;
+
+        await updateRows(rows, 'table2');
 
         table.actions = {
           delete: {
@@ -135,11 +155,25 @@
           },
         };
 
-        const selectedRows = [];
+        let selectedRows = [];
         const editedRows = new Set();
+        stepper.setStepValidity(1, false);
+
+        stepper.addEventListener('step', async event => {
+          console.log('Paso:', event.detail);
+          if(selectedRows.length) {
+            await updateRows(selectedRows, 'tableselected');
+          }
+        })
 
         table.addEventListener('selection', async event => {
           console.log('Filas seleccionadas:', event.detail);
+          const affectedRows = event.detail.selectedRows || event.detail;
+          const affectedIds = affectedRows.map(r => r.id);
+          selectedRows = rows.filter(row => affectedIds.includes(row.id));
+          if(selectedRows.length) {
+            stepper.setStepValidity(1, true);
+          }
         });
         table.addEventListener('search', async event => {
           console.log('Búsqueda:', event.detail);
@@ -153,29 +187,32 @@
         });
         table.addEventListener('action', async event => {
           console.log('Acción:', event.detail);
-          if (event.detail.action === 'save') onSave(event.detail.row);
-          if (event.detail.action === 'delete') onDelete(event.detail.row);
+          const row = rows.find(r => r.id === event.detail.row.id);
+          if (event.detail.action === 'save') onSave(row);
+          if (event.detail.action === 'delete') onDelete(row);
         });
         table.addEventListener('edit', async event => {
           const editedrow = event.detail;
           editedRows.add(editedrow);
           console.log('Edición:', event.detail);
         });
-        table.addEventListener('comboboxSelectionChange', async event => {
+        table.addEventListener('multiselectChange', async event => {
           const selectedOptions = event.detail;
           const affectedRow = event.composedPath().find(r => r.tagName === 'TR'); /*La fila que fue afectada*/
           if (!affectedRow) return;
           const row = rows.find(r => r.id === affectedRow.dataset.id);
           if (!row) return;
+
           row.partner = selectedOptions.map(o => {
             return { id: o.id, name: o.name };
           });
-
-          updateRows(rows);
+          editedRows.add({ row, header: 'partner' });
+          await updateRows(rows, 'table2');
         });
 
         saveall.addEventListener('click', async () => {
           const affectedRows = Array.from(editedRows);
+          console.log({ affectedRows });
           if (!affectedRows) return;
           affectedRows.forEach(ar => {
             const row = rows.find(r => r.id === ar.row.id);
@@ -188,10 +225,11 @@
               },
               body: JSON.stringify(row),
             });
+            console.log({ row });
           });
 
           editedRows.clear();
-          updateRows(rows);
+          await updateRows(rows, 'table2');
         });
         // #endregion
       });

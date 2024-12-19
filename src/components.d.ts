@@ -20,7 +20,7 @@ export namespace Components {
      * TODO: revisar este componente , asignarle un identificador unico
      * para que las opciones seleccionadas solo afecten a este componente
      */
-    interface BtCombobox {
+    interface BtMultiselect {
         "options": string;
         "selectedOptions": string;
     }
@@ -50,9 +50,9 @@ export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLBtButtonElement;
 }
-export interface BtComboboxCustomEvent<T> extends CustomEvent<T> {
+export interface BtMultiselectCustomEvent<T> extends CustomEvent<T> {
     detail: T;
-    target: HTMLBtComboboxElement;
+    target: HTMLBtMultiselectElement;
 }
 export interface BtStepItemCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -84,26 +84,26 @@ declare global {
         prototype: HTMLBtButtonElement;
         new (): HTMLBtButtonElement;
     };
-    interface HTMLBtComboboxElementEventMap {
-        "comboboxSelectionChange": Option[];
+    interface HTMLBtMultiselectElementEventMap {
+        "multiselectChange": Option[];
     }
     /**
      * TODO: revisar este componente , asignarle un identificador unico
      * para que las opciones seleccionadas solo afecten a este componente
      */
-    interface HTMLBtComboboxElement extends Components.BtCombobox, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLBtComboboxElementEventMap>(type: K, listener: (this: HTMLBtComboboxElement, ev: BtComboboxCustomEvent<HTMLBtComboboxElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+    interface HTMLBtMultiselectElement extends Components.BtMultiselect, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtMultiselectElementEventMap>(type: K, listener: (this: HTMLBtMultiselectElement, ev: BtMultiselectCustomEvent<HTMLBtMultiselectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLBtComboboxElementEventMap>(type: K, listener: (this: HTMLBtComboboxElement, ev: BtComboboxCustomEvent<HTMLBtComboboxElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtMultiselectElementEventMap>(type: K, listener: (this: HTMLBtMultiselectElement, ev: BtMultiselectCustomEvent<HTMLBtMultiselectElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
         removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
-    var HTMLBtComboboxElement: {
-        prototype: HTMLBtComboboxElement;
-        new (): HTMLBtComboboxElement;
+    var HTMLBtMultiselectElement: {
+        prototype: HTMLBtMultiselectElement;
+        new (): HTMLBtMultiselectElement;
     };
     interface HTMLBtStepItemElementEventMap {
         "asyncStart": void;
@@ -166,7 +166,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "bt-button": HTMLBtButtonElement;
-        "bt-combobox": HTMLBtComboboxElement;
+        "bt-multiselect": HTMLBtMultiselectElement;
         "bt-step-item": HTMLBtStepItemElement;
         "bt-stepper": HTMLBtStepperElement;
         "bt-table": HTMLBtTableElement;
@@ -191,8 +191,8 @@ declare namespace LocalJSX {
      * TODO: revisar este componente , asignarle un identificador unico
      * para que las opciones seleccionadas solo afecten a este componente
      */
-    interface BtCombobox {
-        "onComboboxSelectionChange"?: (event: BtComboboxCustomEvent<Option[]>) => void;
+    interface BtMultiselect {
+        "onMultiselectChange"?: (event: BtMultiselectCustomEvent<Option[]>) => void;
         "options"?: string;
         "selectedOptions"?: string;
     }
@@ -223,7 +223,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "bt-button": BtButton;
-        "bt-combobox": BtCombobox;
+        "bt-multiselect": BtMultiselect;
         "bt-step-item": BtStepItem;
         "bt-stepper": BtStepper;
         "bt-table": BtTable;
@@ -238,7 +238,7 @@ declare module "@stencil/core" {
              * TODO: revisar este componente , asignarle un identificador unico
              * para que las opciones seleccionadas solo afecten a este componente
              */
-            "bt-combobox": LocalJSX.BtCombobox & JSXBase.HTMLAttributes<HTMLBtComboboxElement>;
+            "bt-multiselect": LocalJSX.BtMultiselect & JSXBase.HTMLAttributes<HTMLBtMultiselectElement>;
             "bt-step-item": LocalJSX.BtStepItem & JSXBase.HTMLAttributes<HTMLBtStepItemElement>;
             "bt-stepper": LocalJSX.BtStepper & JSXBase.HTMLAttributes<HTMLBtStepperElement>;
             "bt-table": LocalJSX.BtTable & JSXBase.HTMLAttributes<HTMLBtTableElement>;
