@@ -16,6 +16,9 @@ export namespace Components {
         "success": boolean;
         "validate"?: boolean;
     }
+    interface BtDropdown {
+        "options": { [key: string]: any };
+    }
     /**
      * TODO: revisar este componente , asignarle un identificador unico
      * para que las opciones seleccionadas solo afecten a este componente
@@ -37,18 +40,27 @@ export namespace Components {
     }
     interface BtTable {
         "actions": { [key: string]: (row: { [key: string]: any }) => void };
-        "applyAsyncSearch": () => Promise<any>;
+        /**
+          * Applies the filters to the table when the 'isAsync' property is set to true. If the 'isAsync' property is set to false, a warning is logged to the console.
+          * @returns
+         */
+        "applyAsyncSearch": () => Promise<void>;
         "config": { [key: string]: any };
+        /**
+          * Returns all selected rows.
+          * @returns
+         */
         "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
-        "headers": { 
-      key: string; 
-      label: string; 
-      class: string; 
-      cellClasses?: (cell: { [key: string]: any }) => string;
-      sortable?: boolean; 
-      filterable?: boolean; 
-      editable?: boolean; 
-      action?: boolean }[];
+        "headers": {
+    key: string;
+    label: string;
+    class: string;
+    cellClasses?: (cell: { [key: string]: any }) => string;
+    sortable?: boolean;
+    filterable?: boolean;
+    editable?: boolean;
+    action?: boolean;
+  }[];
         /**
           * Flag to indicate if the table has async data handles search and pagination
          */
@@ -62,6 +74,10 @@ export namespace Components {
 export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLBtButtonElement;
+}
+export interface BtDropdownCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLBtDropdownElement;
 }
 export interface BtMultiselectCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -96,6 +112,23 @@ declare global {
     var HTMLBtButtonElement: {
         prototype: HTMLBtButtonElement;
         new (): HTMLBtButtonElement;
+    };
+    interface HTMLBtDropdownElementEventMap {
+        "action": any;
+    }
+    interface HTMLBtDropdownElement extends Components.BtDropdown, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtDropdownElementEventMap>(type: K, listener: (this: HTMLBtDropdownElement, ev: BtDropdownCustomEvent<HTMLBtDropdownElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtDropdownElementEventMap>(type: K, listener: (this: HTMLBtDropdownElement, ev: BtDropdownCustomEvent<HTMLBtDropdownElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLBtDropdownElement: {
+        prototype: HTMLBtDropdownElement;
+        new (): HTMLBtDropdownElement;
     };
     interface HTMLBtMultiselectElementEventMap {
         "multiselectChange": Option[];
@@ -161,8 +194,8 @@ declare global {
         "pagination": { [key: string]: any };
         "sort": { key: string; direction: 'asc' | 'desc' | undefined };
         "filter": { filters: { [key: string]: string } };
-        "action": { row: { [key: string]: any }; action: string };
-        "edit": { header: string, row: { [key: string]: any } };
+        "cell-action": { rowId: string; action: string };
+        "edit": { header: string; row: { [key: string]: any } };
     }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
         addEventListener<K extends keyof HTMLBtTableElementEventMap>(type: K, listener: (this: HTMLBtTableElement, ev: BtTableCustomEvent<HTMLBtTableElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -180,6 +213,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "bt-button": HTMLBtButtonElement;
+        "bt-dropdown": HTMLBtDropdownElement;
         "bt-multiselect": HTMLBtMultiselectElement;
         "bt-step-item": HTMLBtStepItemElement;
         "bt-stepper": HTMLBtStepperElement;
@@ -200,6 +234,10 @@ declare namespace LocalJSX {
         "onBtButtonClick"?: (event: BtButtonCustomEvent<{ valid: boolean }>) => void;
         "success"?: boolean;
         "validate"?: boolean;
+    }
+    interface BtDropdown {
+        "onAction"?: (event: BtDropdownCustomEvent<any>) => void;
+        "options"?: { [key: string]: any };
     }
     /**
      * TODO: revisar este componente , asignarle un identificador unico
@@ -222,21 +260,22 @@ declare namespace LocalJSX {
     interface BtTable {
         "actions"?: { [key: string]: (row: { [key: string]: any }) => void };
         "config"?: { [key: string]: any };
-        "headers"?: { 
-      key: string; 
-      label: string; 
-      class: string; 
-      cellClasses?: (cell: { [key: string]: any }) => string;
-      sortable?: boolean; 
-      filterable?: boolean; 
-      editable?: boolean; 
-      action?: boolean }[];
+        "headers"?: {
+    key: string;
+    label: string;
+    class: string;
+    cellClasses?: (cell: { [key: string]: any }) => string;
+    sortable?: boolean;
+    filterable?: boolean;
+    editable?: boolean;
+    action?: boolean;
+  }[];
         /**
           * Flag to indicate if the table has async data handles search and pagination
          */
         "isAsync"?: boolean;
-        "onAction"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }; action: string }>) => void;
-        "onEdit"?: (event: BtTableCustomEvent<{ header: string, row: { [key: string]: any } }>) => void;
+        "onCell-action"?: (event: BtTableCustomEvent<{ rowId: string; action: string }>) => void;
+        "onEdit"?: (event: BtTableCustomEvent<{ header: string; row: { [key: string]: any } }>) => void;
         "onFilter"?: (event: BtTableCustomEvent<{ filters: { [key: string]: string } }>) => void;
         "onPage-size"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
         "onPagination"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;
@@ -249,6 +288,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "bt-button": BtButton;
+        "bt-dropdown": BtDropdown;
         "bt-multiselect": BtMultiselect;
         "bt-step-item": BtStepItem;
         "bt-stepper": BtStepper;
@@ -260,6 +300,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "bt-button": LocalJSX.BtButton & JSXBase.HTMLAttributes<HTMLBtButtonElement>;
+            "bt-dropdown": LocalJSX.BtDropdown & JSXBase.HTMLAttributes<HTMLBtDropdownElement>;
             /**
              * TODO: revisar este componente , asignarle un identificador unico
              * para que las opciones seleccionadas solo afecten a este componente

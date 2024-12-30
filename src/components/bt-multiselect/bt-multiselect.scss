@@ -1,10 +1,15 @@
+:host {
+  display: block;
+  flex: 1;
+  width: 100%;
+}
+
 .multiselect-container {
   position: relative;
   width: 100%;
-  max-width: 200px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-family);
 }
 
 .selected-items {

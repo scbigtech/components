@@ -1,0 +1,71 @@
+// :host {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+bt-button {
+  --button-bg: transparent;
+  --button-color: black;
+}
+
+.dropdown {
+  position: relative;
+
+  &-menu {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+    display: none;
+    list-style: none;
+    min-width: 300px;
+
+    &.left {
+      left: 0;
+      right: auto;
+    }
+
+    &.right {
+      left: auto;
+      right: 0;
+    }
+
+    &.top {
+      top: auto;
+      bottom: 100%;
+    }
+
+    &.bottom {
+      top: 100%;
+      bottom: auto;
+    }
+
+    &.open {
+      display: block;
+    }
+  }
+
+  &-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    &:hover {
+      background-color: #ddd;
+    }
+    &.active {
+      background-color: #f0f0f0;
+    }
+
+    &__icon {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}

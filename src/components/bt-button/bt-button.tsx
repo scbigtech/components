@@ -27,9 +27,7 @@ export class btButton {
    */
   @Event() btButtonClick: EventEmitter<{ valid: boolean }>;
 
-  disconnectedCallback() {
-    
-  }
+
   private handleClick() {
     if (this.disabled || this.loading) return;
 
@@ -60,11 +58,15 @@ export class btButton {
     return (
       <button disabled={this.disabled || this.loading} class={buttonClass} onClick={() => this.handleClick()}>
         <span class="button__content">
-          <slot name="icon-left"></slot>
+          <span class="icon-wrapper">
+            <slot name="icon-left"></slot>
+          </span>
           <span class={`button__text ${this.hideText ? 'sr-only' : ''}`}>
             <slot></slot>
           </span>
-          <slot name="icon-right"></slot>
+          <span class="icon-wrapper">
+            <slot name="icon-right"></slot>
+          </span>
         </span>
       </button>
     );

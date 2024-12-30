@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Fragment, Method, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, Listen, Method, Prop, State, Watch, h } from '@stencil/core';
 
 @Component({
   tag: 'bt-table',
@@ -6,15 +6,16 @@ import { Component, Event, EventEmitter, Fragment, Method, Prop, State, Watch, h
   shadow: true,
 })
 export class BtTable {
-  @Prop() headers: { 
-      key: string; 
-      label: string; 
-      class: string; 
-      cellClasses?: (cell: { [key: string]: any }) => string;
-      sortable?: boolean; 
-      filterable?: boolean; 
-      editable?: boolean; 
-      action?: boolean }[] = [];
+  @Prop() headers: {
+    key: string;
+    label: string;
+    class: string;
+    cellClasses?: (cell: { [key: string]: any }) => string;
+    sortable?: boolean;
+    filterable?: boolean;
+    editable?: boolean;
+    action?: boolean;
+  }[] = [];
   @Prop() rows: { [key: string]: any }[] = [];
   @Prop() actions: { [key: string]: (row: { [key: string]: any }) => void } = {};
   /**
@@ -42,16 +43,16 @@ export class BtTable {
     actions: 'Actions',
   };
 
-  private initialState: { 
-    filteredRows: { [key: string]: any }[],
-    searchText: string,
-    sortConfig: { key: string; direction: 'asc' | 'desc' | undefined },
-    currentPage: number,
-    columnFilters: { [key: string]: string },
-    selectedRows: Set<string>,
-    totalPages: number,
-    internalTotalRows: number,
-    paginationSize: number
+  private initialState: {
+    filteredRows: { [key: string]: any }[];
+    searchText: string;
+    sortConfig: { key: string; direction: 'asc' | 'desc' | undefined };
+    currentPage: number;
+    columnFilters: { [key: string]: string };
+    selectedRows: Set<string>;
+    totalPages: number;
+    internalTotalRows: number;
+    paginationSize: number;
   } = {
     filteredRows: [],
     searchText: '',
@@ -62,7 +63,7 @@ export class BtTable {
     totalPages: 1,
     internalTotalRows: 0,
     paginationSize: this.pageSize,
-  }
+  };
 
   @State() filteredRows: { [key: string]: any }[] = this.initialState.filteredRows;
   @State() searchText: string = this.initialState.searchText;
@@ -73,6 +74,7 @@ export class BtTable {
   @State() totalPages: number = this.initialState.totalPages;
   @State() internalTotalRows: number = this.initialState.internalTotalRows;
   @State() paginationSize: number = this.initialState.paginationSize;
+  @State() parsedActions: { [key: string]: string } = {};
 
   @Event({ composed: true, bubbles: true }) search: EventEmitter<{ searchText: string }>;
   @Event({ eventName: 'selection', composed: true, bubbles: true }) rowSelect: EventEmitter<{ [key: string]: any }>;
@@ -80,30 +82,30 @@ export class BtTable {
   @Event({ composed: true, bubbles: true }) pagination: EventEmitter<{ [key: string]: any }>;
   @Event({ composed: true, bubbles: true }) sort: EventEmitter<{ key: string; direction: 'asc' | 'desc' | undefined }>;
   @Event({ composed: true, bubbles: true }) filter: EventEmitter<{ filters: { [key: string]: string } }>;
-  @Event({ eventName: 'action', composed: true, bubbles: true }) onCellAction: EventEmitter<{ row: { [key: string]: any }; action: string }>;
-  @Event({ eventName: 'edit', composed: true, bubbles: true }) cellEdit: EventEmitter<{ header: string, row: { [key: string]: any } }>;
+  @Event({ eventName: 'cell-action', composed: true, bubbles: true }) onCellAction: EventEmitter<{ rowId: string; action: string }>;
+  @Event({ eventName: 'edit', composed: true, bubbles: true }) cellEdit: EventEmitter<{ header: string; row: { [key: string]: any } }>;
 
   @Watch('rows')
   onRowsChange() {
     this.updateRows();
   }
 
-  @Method()
   /**
    * Returns all selected rows.
    * @returns {Promise<{ [key: string]: any }[]>}
    */
-  async getAllSelectedRows() {
+  @Method()
+  async getAllSelectedRows(): Promise<{ [key: string]: any }[]> {
     return this.rows.filter(row => this.selectedRows.has(row.id));
   }
 
-  @Method()
   /**
    * Applies the filters to the table when the 'isAsync' property is set to true.
    * If the 'isAsync' property is set to false, a warning is logged to the console.
    * @returns {Promise<void>}
    */
-  async applyAsyncSearch() {
+  @Method()
+  async applyAsyncSearch(): Promise<void> {
     if (this.isAsync) this.applyFilters();
     else {
       console.warn("The 'applyAsyncSearch' method can only be called when the 'isAsync' property is set to true.");
@@ -112,7 +114,7 @@ export class BtTable {
   }
 
   @Method()
-  async resetTable(){
+  async resetTable() {
     this.filteredRows = [...this.rows];
     this.searchText = this.initialState.searchText;
     this.currentPage = this.initialState.currentPage;
@@ -120,13 +122,11 @@ export class BtTable {
     this.selectedRows = this.initialState.selectedRows;
   }
 
-  private emitCellAction(row: { [key: string]: any }, action: any) {
-    if (this.actions[action]['handler']) {
-      this.actions[action]['handler'](row);
-      this.onCellAction.emit({ row, action });
-    } else {
-      console.warn(`No handler found for action: ${action}`);
-    }
+  @Listen('action')
+  emitCellAction(event: CustomEvent<any>) {
+    const target = event.composedPath().find(r => (r as HTMLElement).tagName === 'TR');
+    const row = this.rows.find(r => r.id === (target as HTMLElement).dataset.id);
+    this.onCellAction.emit({ rowId: row.id, action: event.detail });
   }
 
   componentWillLoad() {
@@ -153,16 +153,16 @@ export class BtTable {
       console.warn('rows is invalid or not set');
       return false;
     }
-    if(!this.rows.every(row => typeof row === 'object')) {
+    if (!this.rows.every(row => typeof row === 'object')) {
       console.warn('rows must be an array of objects');
-      return false
+      return false;
     }
 
-    if(!this.rows.every(row => !!row.id)) {
+    if (!this.rows.every(row => !!row.id)) {
       console.warn('All rows must have an id');
-      return false
+      return false;
     }
-    
+
     const headerKeys = this.headers.map(header => header.key);
     return this.rows.every(row => {
       headerKeys.forEach(key => {
@@ -241,6 +241,7 @@ export class BtTable {
     }
     this.filteredRows = rows;
     this.currentPage = 1;
+    this.internalTotalRows = this.filteredRows.length;
   }
 
   private async handleRowSelection(id: string) {
@@ -423,7 +424,7 @@ export class BtTable {
   private handleCellEdit(row: { [key: string]: any }, header: string, event: Event) {
     const input = event.target as HTMLInputElement;
     row[header] = input.textContent;
-    this.cellEdit.emit({header,  row });
+    this.cellEdit.emit({ header, row });
   }
 
   render() {
@@ -550,23 +551,26 @@ export class BtTable {
             <tbody>
               {this.paginatedRows.map(row => (
                 <tr data-id={row.id}>
-                  <td>
-                    <label class="sr-only" htmlFor={row.id}>{this.config.select}</label>
+                  <td class="selectioncell" headers={this.config.select}>
+                    <label class="sr-only" htmlFor={row.id}>
+                      {this.config.select}
+                    </label>
                     <input id={row.id} class="selection-checkbox" type="checkbox" checked={this.selectedRows.has(row.id)} onChange={() => this.handleRowSelection(row.id)} />
                   </td>
                   {this.headers.map(header => (
-                    <td class={header.cellClasses && header.cellClasses(row[header.key])} contentEditable={header.editable} onBlur={event => this.handleCellEdit(row, header.key, event)} innerHTML={row[header.key] ? row[header.key] : '-'}></td>
+                    <td
+                      key={header.key}
+                      headers={header.key}
+                      data-label={header.label}
+                      class={header.cellClasses && header.cellClasses(row[header.key])}
+                      contentEditable={header.editable}
+                      onBlur={event => this.handleCellEdit(row, header.key, event)}
+                      innerHTML={row[header.key] ? row[header.key] : '-'}
+                    ></td>
                   ))}
                   {Object.keys(this.actions).length > 0 && (
-                    <td>
-                      <div class="actions">
-                        {Object.keys(this.actions).map(action => (
-                          <bt-button hideText={true} class={`${this.actions[action]['class']}`} onClick={() => this.emitCellAction(row, action)}>
-                            {this.actions[action]['label'] || action}
-                            <span slot="icon-right" innerHTML={this.actions[action]['icon']}></span>
-                          </bt-button>
-                        ))}
-                      </div>
+                    <td class="actionscell" headers={this.config.actions}>
+                      <bt-dropdown options={this.actions}></bt-dropdown>
                     </td>
                   )}
                 </tr>
@@ -576,7 +580,7 @@ export class BtTable {
         </div>
 
         {/* Pagination */}
-        {this.totalRows > this.paginationSize && this.renderPagination()}
+        {this.internalTotalRows > this.paginationSize && this.renderPagination()}
         <slot></slot>
       </section>
     );

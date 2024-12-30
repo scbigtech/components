@@ -58,7 +58,7 @@ button:not(:disabled):hover .button__content {
 
 button:not(:disabled):hover {
   background: var(--button-hover-bg);
-  & slot[name^='icon']::slotted(*){
+  & .icon-wrapper{
       animation: rotateandgrow .4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
@@ -97,7 +97,6 @@ slot[name^='icon']::slotted(*) {
   justify-content: center;
   width: var(--icon-size);
   height: var(--icon-size);
-  display: inline-block;
 }
 
 @keyframes loading {
@@ -121,3 +120,4 @@ slot[name^='icon']::slotted(*) {
     transform-origin: center;
   }
 }
+

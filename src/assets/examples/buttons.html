@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Stencil Component Starter</title>
+    <link rel="stylesheet" href="/build/components.css" />
+    <script type="module" src="/build/components.esm.js"></script>
+    <style>
+      body {
+        font-size: 16px;
+      }
+
+      .container {
+        min-height: 100vh;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
+
+      .box {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      bt-button:hover .icon {
+        animation: rotateandgrow .4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <bt-button>
+        <span slot="icon-left"><svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;"><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path></svg></span>
+        test
+      </bt-button>
+    </div>
+
+    <script type="module">
+
+    </script>
+  </body>
+</html>

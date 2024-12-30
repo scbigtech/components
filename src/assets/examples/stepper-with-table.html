@@ -43,6 +43,7 @@
 
       .alert {
         padding: 1rem;
+        margin-bottom: 1rem;
         border-radius: 0.5rem;
       }
 
@@ -51,20 +52,8 @@
       }
 
       .success {
-        background-color: lightgreen;
+        --cell-bg-color: var(--success-bg);
       }
-
-      @keyframes rotateandgrow {
-  0% {
-    transform: rotate(90deg) scale(0);
-    transform-origin: center;
-  }
-
-  100% {
-    transform: rotate(360deg) scale(1);
-    transform-origin: center;
-  }
-}
     </style>
   </head>
 
@@ -81,19 +70,14 @@
         </bt-step-item>
         <bt-step-item id="step1">
           <div class="alert alert-info" id="alertselection">
-            <p>
-              Seleccione un elemento para continuar
-            </p>
+            <p>Seleccione un elemento para continuar</p>
           </div>
-          <bt-table id="table2" page-size="5" is-async="true">
-            <bt-button id="saveall" class="success">Save</bt-button>
-          </bt-table>
+          <bt-table id="table2" page-size="5" is-async></bt-table>
         </bt-step-item>
         <bt-step-item id="step2">
           <bt-table id="tableOfSelectedElements" page-size="5"></bt-table>
         </bt-step-item>
       </bt-stepper>
-    
     </div>
 
     <script type="module">
@@ -141,7 +125,7 @@
       async function updateRows(rows, tableid) {
         const table = document.getElementById(tableid);
         const mappedRows = mapRows(rows);
-        table.totalRows = rows.length;
+        table.totalRows = mappedRows.length;
         table.rows = [...mappedRows];
       }
       window.addEventListener('load', async () => {
@@ -154,18 +138,40 @@
         const tableselected = document.getElementById('tableOfSelectedElements');
         const saveall = document.getElementById('saveall');
         const stepper = document.querySelector('bt-stepper');
-        const alertselection = document.querySelector('#alertselection')
+        const alertselection = document.querySelector('#alertselection');
         const headers = [
-          { key: 'name', label: 'Name', sortable: true, editable: true },
-          { key: 'age', label: 'Age', sortable: true, class: 'w-50', editable: true, cellClasses: (cell)=> {
-            return cell.age < 18 ? 'danger' : 'success'
-            
-          }},
-          { key: 'partner', label: 'Partner' },
-          { key: 'company', label: 'Company' },
-          { key: 'contact', label: 'Contact' },
+          { key: 'name', label: 'Nombre', sortable: true },
+          {
+            key: 'age',
+            label: 'Edad',
+            sortable: true,
+            class: 'w-50',
+            cellClasses: cell => {
+              return cell.age < 18 ? 'danger' : 'success';
+            },
+          },
+          { key: 'partner', label: 'Socio' },
+          { key: 'company', label: 'Empresa' },
+          { key: 'contact', label: 'Contacto' },
         ];
-
+        const config = {
+          caption: 'Tabla de datos',
+          next: 'Siguiente',
+          prev: 'Anterior',
+          emptyData: 'No hay datos',
+          loading: 'Cargando...',
+          error: 'Error',
+          pagesize: 'Filas por página',
+          page: 'Página',
+          rows: 'Filas',
+          select: 'Seleccionar',
+          selectall: 'Seleccionar todo',
+          search: 'Buscar',
+          sort: 'Ordenar',
+          filter: 'Filtrar',
+          actions: 'Acciones',
+        };
+        table.config = config;
         table.headers = headers;
         tableselected.headers = headers;
 
@@ -175,17 +181,26 @@
           delete: {
             label: 'Eliminar',
             class: 'danger',
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path></svg>',
-            handler: row => {
+            icon: '<svg slot="icon-right" xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path></svg>',
+            handler: async row => {
               table.rows = table.rows.filter(r => r.id !== row.id);
+              //api to delete
             },
           },
           save: {
             label: 'Guardar',
             class: 'success',
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2zM7 5h4v2h2V5h2v4H7V5zm0 8h10v6H7v-6z"></path></svg>',
-            handler: row => {
-              console.log(row);
+            icon: '<svg  slot="icon-right" xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2zM7 5h4v2h2V5h2v4H7V5zm0 8h10v6H7v-6z"></path></svg>',
+            handler: async row => {
+              const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(row),
+              });
+              const json = await updatedRow.json();
+              console.log(json);
             },
           },
         };
@@ -224,11 +239,10 @@
           table.rows = [...table.rows, ...nonexistingRows];
           table.applyAsyncSearch();
         });
-        table.addEventListener('action', async event => {
-          console.log('Acción:', event.detail);
-          const row = rows.find(r => r.id === event.detail.row.id);
-          if (event.detail.action === 'save') onSave(row);
-          if (event.detail.action === 'delete') onDelete(row);
+        table.addEventListener('cell-action', ({ detail }) => {
+          const { rowId, action } = detail;
+          const handler = action.handler;
+          handler(rows.find(r => r.id === rowId));
         });
         table.addEventListener('edit', async event => {
           const editedrow = event.detail;
@@ -249,56 +263,40 @@
           await updateRows(rows, 'table2');
         });
 
-        saveall.addEventListener('click', async () => {
-          const affectedRows = Array.from(editedRows);
-          console.log({ affectedRows });
-          if (!affectedRows) return;
-          affectedRows.forEach(ar => {
-            const row = rows.find(r => r.id === ar.row.id);
-            if (!row) return;
-            row[ar.header] = ar.row[ar.header];
-            fetch(`http://localhost:3000/users/${row.id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(row),
-            });
-            console.log({ row });
-          });
+        // saveall.addEventListener('click', async () => {
+        //   const affectedRows = Array.from(editedRows);
+        //   console.log({ affectedRows });
+        //   if (!affectedRows) return;
+        //   affectedRows.forEach(ar => {
+        //     const row = rows.find(r => r.id === ar.row.id);
+        //     if (!row) return;
+        //     row[ar.header] = ar.row[ar.header];
+        //     fetch(`http://localhost:3000/users/${row.id}`, {
+        //       method: 'PUT',
+        //       headers: {
+        //         'Content-Type': 'application/json',
+        //       },
+        //       body: JSON.stringify(row),
+        //     });
+        //     console.log({ row });
+        //   });
 
-          editedRows.clear();
-          await updateRows(rows, 'table2');
-        });
+        //   editedRows.clear();
+        //   await updateRows(rows, 'table2');
+        // });
         stepper.addEventListener('stepperEnd', async () => {
           /*
             fetch to an api all selected rows etc..
           */
-          console.log("stepperEnd", selectedRows);
+          console.log('stepperEnd', selectedRows);
           selectedRows = [];
           alertselection.classList.add('hidden');
           await stepper.setStepValidity(1, false);
           await stepper.setStep(0);
           await table.resetTable();
-         
         });
         // #endregion
       });
-
-      async function onDelete(row) {
-        // llamado a api...
-      }
-      async function onSave(row) {
-        const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(row),
-        });
-        const json = await updatedRow.json();
-        console.log(json);
-      }
     </script>
   </body>
 </html>

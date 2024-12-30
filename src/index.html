@@ -30,103 +30,50 @@
         display: none;
       }
 
-      .contact {
-        margin: 0;
+      .flex-row-spaced {
+        display: flex;
+        justify-content: space-between;
       }
-
-      .alert {
-        padding: 1rem;
-        border-radius: 0.5rem;
-      }
-
-      .alert-info {
-        background-color: lightblue;
-      }
-
-      .success {
-        background-color: lightgreen;
-      }
+      
     </style>
   </head>
 
   <body>
     <div class="container">
-      <bt-table id="table2" page-size="5">
-      </bt-table>
+      <div class="flex-row-spaced">
+        <bt-dropdown id="dropdown-1"></bt-dropdown>
+        <bt-dropdown id="dropdown-2"></bt-dropdown>
+      </div>
     
     </div>
 
     <script type="module">
-      const cache = {};
-      async function getData(uri, params) {
-        const _params = new URLSearchParams(params).toString();
-        const query = `${uri}?${_params}`;
-        if (cache[query]) {
-          return cache[query];
+      import { icons } from "./assets/icons.js";
+      const menu1 = document.querySelector('#dropdown-1');
+      const menu2 = document.querySelector('#dropdown-2');
+      const options = {
+        'Option 1': {
+          icon: icons.change,
+          label: 'Option 1',
+          endpoint: 'http://localhost:3000/users?_page=1&_limit=10',
+          action: async (data) => {
+            const response = await fetch(data.endpoint);
+            const json = await response.json();
+            console.log(json);
+          }
+        },
+        'Option 2': {
+          label: 'Option 2',
+          action: (data) => console.log(data.label)
+        },
+        'Option 3': {
+          label: 'Option 3',
+          action: (data) => console.log(data.label)
         }
-        const data = await fetch(query);
-        const json = await data.json();
-        cache[query] = json;
-        return json;
       }
 
-      function getPartners() {
-        return JSON.stringify([
-          { id: '1', name: 'Partner 1' },
-          { id: '2', name: 'Partner 2' },
-          { id: '3', name: 'Partner 3' },
-        ]);
-      }
-
-      function mapRows(rows) {
-        return rows.map(row => {
-          return {
-            id: row.id,
-            name: row.name,
-            age: row.age,
-            company: row.company,
-            partner: `
-              <bt-multiselect key="${row.id}-partner" options='${getPartners()}' selected-options='${JSON.stringify(row.partner || [])}'></bt-multiselect>
-            `,
-            contact: `
-            <ul class="contact">
-              <li>${row.email}</li>
-              <li>${row.phone}</li>
-            </ul>
-            `,
-          };
-        });
-      }
-
-      async function updateRows(rows, tableid) {
-        const table = document.getElementById(tableid);
-        const mappedRows = mapRows(rows);
-        table.totalRows = rows.length;
-        table.rows = [...mappedRows];
-      }
-      window.addEventListener('load', async () => {
-        // #region Table
-        const rows = await getData('http://localhost:3000/users');
-        // console.log(rows);
-        if (!rows) return;
-
-        const table = document.getElementById('table2');
-        const tableselected = document.getElementById('tableOfSelectedElements');
-        const headers = [
-          { key: 'name', label: 'Name', sortable: true, editable: true },
-          { key: 'age', label: 'Age', sortable: true, class: 'w-50', editable: true, cellClasses: (cell)=> {
-            return cell.age < 18 ? 'danger' : 'success'
-            
-          }},
-          { key: 'partner', label: 'Partner' },
-          { key: 'company', label: 'Company' },
-          { key: 'contact', label: 'Contact' },
-        ];
-
-        table.headers = headers;
-
-        await updateRows(rows, 'table2');
-      });
+      menu1.options = options;
+      menu2.options = options;
     </script>
   </body>
 </html>

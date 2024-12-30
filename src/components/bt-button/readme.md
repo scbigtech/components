@@ -43,12 +43,14 @@ can be used in any component to create a button with the same styling
 
 ### Used by
 
+ - [bt-dropdown](../bt-dropdown)
  - [bt-stepper](../bt-stepper)
  - [bt-table](../bt-table)
 
 ### Graph
 ```mermaid
 graph TD;
+  bt-dropdown --> bt-button
   bt-stepper --> bt-button
   bt-table --> bt-button
   style bt-button fill:#f9f,stroke:#333,stroke-width:4px

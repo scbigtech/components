@@ -1,6 +1,7 @@
 :host {
   --space: 1rem;
   --bg-color: var(--primary-bg);
+  --cell-bg-color: transparent;
 }
 
 .sr-only {
@@ -25,22 +26,26 @@
   justify-content: space-between;
   align-items: flex-end;
   flex-direction: column;
+  gap: var(--space);
   margin-bottom: var(--space);
 }
 
 .search-container {
   display: flex;
   justify-content: flex-end;
+  flex: 1;
+  width: 100%;
 
   & div {
     position: relative;
     display: flex;
+    width: 100%;
     justify-content: space-between;
     align-items: center;
   }
 
   & input {
-    width: auto;
+    width: 100%;
     padding: .5rem;
     padding-right: 2.5rem;
     border: 0;
@@ -99,6 +104,7 @@ table {
 
 th,
 td {
+  background: var(--cell-bg-color);
   position: relative;
   padding: 8px;
   border: 1px solid #ddd;
@@ -207,5 +213,58 @@ tbody .actions {
 @media screen and (min-width: 768px) {
   .toolbar {
     flex-direction: row;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  table, tbody {
+    display: block;  
+  }
+
+  thead {
+    display: none;
+  }
+  tr {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid #ddd;
+    margin-bottom: 1rem;
+
+    &:nth-child(even){
+      background-color: inherit;
+    }
+  }
+
+  td {
+    width: 100%;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: 1px solid #ddd;
+   
+    &::before {
+      content: attr(data-label);
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    order: 1;
+  }
+
+  td.selectioncell,
+  td.actionscell {
+    width: 45%;
+    flex: 1;
+    order: 0;
+    background-color: #f5f5f5;
+  }
+  td:last-child{
+    text-align: right;
+  }
+
+  footer {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
   }
 }
