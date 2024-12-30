@@ -1,6 +1,6 @@
 :host {
   --space: 1rem;
-  --bg-color: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+  --bg-color: var(--primary-bg);
 }
 
 .sr-only {
@@ -169,10 +169,10 @@ th input[type="text"] {
 .selection-checkbox {
   appearance: none;
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 0.2rem;
   cursor: pointer;
   outline: none;
   margin: 0;
@@ -187,14 +187,15 @@ th input[type="text"] {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
+    color: var(--success-bg);
     font-weight: bold;
   }
 
 }
 
 tbody tr:has(.selection-checkbox:checked) {
-  background-color: hsla(var(--success-hue), var(--success-saturation), var(--success-lightness), 0.1);
+  $color: 'hsl(from var(--success-bg) h s l / 0.1)';
+  background-color: unquote($color);
 }
 
 tbody .actions {

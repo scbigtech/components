@@ -6,9 +6,21 @@ import { Component, Event, EventEmitter, Fragment, Method, Prop, State, Watch, h
   shadow: true,
 })
 export class BtTable {
-  @Prop() headers: { key: string; label: string; class: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[] = [];
+  @Prop() headers: { 
+      key: string; 
+      label: string; 
+      class: string; 
+      cellClasses?: (cell: { [key: string]: any }) => string;
+      sortable?: boolean; 
+      filterable?: boolean; 
+      editable?: boolean; 
+      action?: boolean }[] = [];
   @Prop() rows: { [key: string]: any }[] = [];
   @Prop() actions: { [key: string]: (row: { [key: string]: any }) => void } = {};
+  /**
+   * Flag to indicate if the table has async data
+   * handles search and pagination
+   */
   @Prop() isAsync: boolean = false;
   @Prop() pageSize: number = 5;
   @Prop() totalRows?: number;
@@ -30,15 +42,37 @@ export class BtTable {
     actions: 'Actions',
   };
 
-  @State() filteredRows: { [key: string]: any }[] = [];
-  @State() searchText: string = '';
-  @State() sortConfig: { key: string; direction: 'asc' | 'desc' | undefined } = { key: '', direction: undefined };
-  @State() currentPage: number = 1;
-  @State() columnFilters: { [key: string]: string } = {};
-  @State() selectedRows: Set<string> = new Set();
-  @State() totalPages: number = 1;
-  @State() internalTotalRows: number = 0;
-  @State() paginationSize: number = this.pageSize;
+  private initialState: { 
+    filteredRows: { [key: string]: any }[],
+    searchText: string,
+    sortConfig: { key: string; direction: 'asc' | 'desc' | undefined },
+    currentPage: number,
+    columnFilters: { [key: string]: string },
+    selectedRows: Set<string>,
+    totalPages: number,
+    internalTotalRows: number,
+    paginationSize: number
+  } = {
+    filteredRows: [],
+    searchText: '',
+    sortConfig: { key: '', direction: undefined },
+    currentPage: 1,
+    columnFilters: {},
+    selectedRows: new Set(),
+    totalPages: 1,
+    internalTotalRows: 0,
+    paginationSize: this.pageSize,
+  }
+
+  @State() filteredRows: { [key: string]: any }[] = this.initialState.filteredRows;
+  @State() searchText: string = this.initialState.searchText;
+  @State() sortConfig: { key: string; direction: 'asc' | 'desc' | undefined } = this.initialState.sortConfig;
+  @State() currentPage: number = this.initialState.currentPage;
+  @State() columnFilters: { [key: string]: string } = this.initialState.columnFilters;
+  @State() selectedRows: Set<string> = this.initialState.selectedRows;
+  @State() totalPages: number = this.initialState.totalPages;
+  @State() internalTotalRows: number = this.initialState.internalTotalRows;
+  @State() paginationSize: number = this.initialState.paginationSize;
 
   @Event({ composed: true, bubbles: true }) search: EventEmitter<{ searchText: string }>;
   @Event({ eventName: 'selection', composed: true, bubbles: true }) rowSelect: EventEmitter<{ [key: string]: any }>;
@@ -55,17 +89,35 @@ export class BtTable {
   }
 
   @Method()
+  /**
+   * Returns all selected rows.
+   * @returns {Promise<{ [key: string]: any }[]>}
+   */
   async getAllSelectedRows() {
     return this.rows.filter(row => this.selectedRows.has(row.id));
   }
 
   @Method()
+  /**
+   * Applies the filters to the table when the 'isAsync' property is set to true.
+   * If the 'isAsync' property is set to false, a warning is logged to the console.
+   * @returns {Promise<void>}
+   */
   async applyAsyncSearch() {
     if (this.isAsync) this.applyFilters();
     else {
       console.warn("The 'applyAsyncSearch' method can only be called when the 'isAsync' property is set to true.");
       return null;
     }
+  }
+
+  @Method()
+  async resetTable(){
+    this.filteredRows = [...this.rows];
+    this.searchText = this.initialState.searchText;
+    this.currentPage = this.initialState.currentPage;
+    this.columnFilters = this.initialState.columnFilters;
+    this.selectedRows = this.initialState.selectedRows;
   }
 
   private emitCellAction(row: { [key: string]: any }, action: any) {
@@ -503,7 +555,7 @@ export class BtTable {
                     <input id={row.id} class="selection-checkbox" type="checkbox" checked={this.selectedRows.has(row.id)} onChange={() => this.handleRowSelection(row.id)} />
                   </td>
                   {this.headers.map(header => (
-                    <td contentEditable={header.editable} onBlur={event => this.handleCellEdit(row, header.key, event)} innerHTML={row[header.key] ? row[header.key] : '-'}></td>
+                    <td class={header.cellClasses && header.cellClasses(row[header.key])} contentEditable={header.editable} onBlur={event => this.handleCellEdit(row, header.key, event)} innerHTML={row[header.key] ? row[header.key] : '-'}></td>
                   ))}
                   {Object.keys(this.actions).length > 0 && (
                     <td>

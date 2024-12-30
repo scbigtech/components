@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Stencil Component Starter</title>
+    <link rel="stylesheet" href="/build/components.css" />
+    <script type="module" src="/build/components.esm.js"></script>
+    <style>
+      /* :root {
+      --primary-hue: 352.8;
+      --primary-lightness: 43.9%;
+      --secondary-hue: 213.8;
+      --secondary-lightness: 25.1%;
+    } */
+
+      body {
+        font-size: 16px;
+      }
+
+      .container {
+        min-height: 100vh;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
+
+      .box {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .contact {
+        margin: 0;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+      }
+
+      .alert-info {
+        background-color: lightblue;
+      }
+
+      .success {
+        background-color: lightgreen;
+      }
+
+      @keyframes rotateandgrow {
+  0% {
+    transform: rotate(90deg) scale(0);
+    transform-origin: center;
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+    transform-origin: center;
+  }
+}
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <bt-stepper class="bigmat-stepper">
+        <bt-step-item id="step0">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula commodo magna, sed hendrerit ipsum viverra varius. Proin posuere arcu ligula, eget tempus sapien
+            consequat nec. Aliquam at mauris nec purus finibus rutrum. Nunc tellus est, hendrerit et dapibus condimentum, tincidunt at metus. Vivamus at iaculis elit. Nunc quis
+            consectetur velit. Pellentesque convallis justo lectus, quis volutpat elit bibendum in. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
+            ridiculus mus. Sed tincidunt ipsum mi, vel pretium nisi ornare nec.
+          </p>
+        </bt-step-item>
+        <bt-step-item id="step1">
+          <div class="alert alert-info" id="alertselection">
+            <p>
+              Seleccione un elemento para continuar
+            </p>
+          </div>
+          <bt-table id="table2" page-size="5" is-async="true">
+            <bt-button id="saveall" class="success">Save</bt-button>
+          </bt-table>
+        </bt-step-item>
+        <bt-step-item id="step2">
+          <bt-table id="tableOfSelectedElements" page-size="5"></bt-table>
+        </bt-step-item>
+      </bt-stepper>
+    
+    </div>
+
+    <script type="module">
+      const cache = {};
+      async function getData(uri, params) {
+        const _params = new URLSearchParams(params).toString();
+        const query = `${uri}?${_params}`;
+        if (cache[query]) {
+          return cache[query];
+        }
+        const data = await fetch(query);
+        const json = await data.json();
+        cache[query] = json;
+        return json;
+      }
+
+      function getPartners() {
+        return JSON.stringify([
+          { id: '1', name: 'Partner 1' },
+          { id: '2', name: 'Partner 2' },
+          { id: '3', name: 'Partner 3' },
+        ]);
+      }
+
+      function mapRows(rows) {
+        return rows.map(row => {
+          return {
+            id: row.id,
+            name: row.name,
+            age: row.age,
+            company: row.company,
+            partner: `
+              <bt-multiselect key="${row.id}-partner" options='${getPartners()}' selected-options='${JSON.stringify(row.partner || [])}'></bt-multiselect>
+            `,
+            contact: `
+            <ul class="contact">
+              <li>${row.email}</li>
+              <li>${row.phone}</li>
+            </ul>
+            `,
+          };
+        });
+      }
+
+      async function updateRows(rows, tableid) {
+        const table = document.getElementById(tableid);
+        const mappedRows = mapRows(rows);
+        table.totalRows = rows.length;
+        table.rows = [...mappedRows];
+      }
+      window.addEventListener('load', async () => {
+        // #region Table
+        const rows = await getData('http://localhost:3000/users');
+        // console.log(rows);
+        if (!rows) return;
+
+        const table = document.getElementById('table2');
+        const tableselected = document.getElementById('tableOfSelectedElements');
+        const saveall = document.getElementById('saveall');
+        const stepper = document.querySelector('bt-stepper');
+        const alertselection = document.querySelector('#alertselection')
+        const headers = [
+          { key: 'name', label: 'Name', sortable: true, editable: true },
+          { key: 'age', label: 'Age', sortable: true, class: 'w-50', editable: true, cellClasses: (cell)=> {
+            return cell.age < 18 ? 'danger' : 'success'
+            
+          }},
+          { key: 'partner', label: 'Partner' },
+          { key: 'company', label: 'Company' },
+          { key: 'contact', label: 'Contact' },
+        ];
+
+        table.headers = headers;
+        tableselected.headers = headers;
+
+        await updateRows(rows, 'table2');
+
+        table.actions = {
+          delete: {
+            label: 'Eliminar',
+            class: 'danger',
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path></svg>',
+            handler: row => {
+              table.rows = table.rows.filter(r => r.id !== row.id);
+            },
+          },
+          save: {
+            label: 'Guardar',
+            class: 'success',
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2zM7 5h4v2h2V5h2v4H7V5zm0 8h10v6H7v-6z"></path></svg>',
+            handler: row => {
+              console.log(row);
+            },
+          },
+        };
+
+        let selectedRows = [];
+        const editedRows = new Set();
+        stepper.setStepValidity(1, false);
+
+        stepper.addEventListener('step', async event => {
+          console.log('Paso:', event.detail);
+          if (selectedRows.length) {
+            await updateRows(selectedRows, 'tableOfSelectedElements');
+          }
+        });
+
+        table.addEventListener('selection', async event => {
+          console.log('Filas seleccionadas:', event.detail);
+          const affectedRows = event.detail.selectedRows || event.detail;
+          const affectedIds = affectedRows.map(r => r.id);
+          selectedRows = rows.filter(row => affectedIds.includes(row.id));
+          if (selectedRows.length) {
+            alertselection.classList.add('hidden');
+            stepper.setStepValidity(1, true);
+          } else {
+            alertselection.classList.remove('hidden');
+            stepper.setStepValidity(1, false);
+          }
+        });
+        table.addEventListener('search', async event => {
+          console.log('Búsqueda:', event.detail);
+          const searchRows = await getData('http://localhost:3000/users');
+          if (!searchRows) return;
+          const filteredRows = searchRows.filter(row => row.name.toLowerCase().includes(event.detail.searchText.toLowerCase()));
+          if (!filteredRows) return;
+          const nonexistingRows = filteredRows.filter(row => !table.rows.map(r => r.id).includes(row.id));
+          table.rows = [...table.rows, ...nonexistingRows];
+          table.applyAsyncSearch();
+        });
+        table.addEventListener('action', async event => {
+          console.log('Acción:', event.detail);
+          const row = rows.find(r => r.id === event.detail.row.id);
+          if (event.detail.action === 'save') onSave(row);
+          if (event.detail.action === 'delete') onDelete(row);
+        });
+        table.addEventListener('edit', async event => {
+          const editedrow = event.detail;
+          editedRows.add(editedrow);
+          console.log('Edición:', event.detail);
+        });
+        table.addEventListener('multiselectChange', async event => {
+          const selectedOptions = event.detail;
+          const affectedRow = event.composedPath().find(r => r.tagName === 'TR'); /*La fila  afectada*/
+          if (!affectedRow) return;
+          const row = rows.find(r => r.id === affectedRow.dataset.id);
+          if (!row) return;
+
+          row.partner = selectedOptions.map(o => {
+            return { id: o.id, name: o.name };
+          });
+          editedRows.add({ row, header: 'partner' });
+          await updateRows(rows, 'table2');
+        });
+
+        saveall.addEventListener('click', async () => {
+          const affectedRows = Array.from(editedRows);
+          console.log({ affectedRows });
+          if (!affectedRows) return;
+          affectedRows.forEach(ar => {
+            const row = rows.find(r => r.id === ar.row.id);
+            if (!row) return;
+            row[ar.header] = ar.row[ar.header];
+            fetch(`http://localhost:3000/users/${row.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(row),
+            });
+            console.log({ row });
+          });
+
+          editedRows.clear();
+          await updateRows(rows, 'table2');
+        });
+        stepper.addEventListener('stepperEnd', async () => {
+          /*
+            fetch to an api all selected rows etc..
+          */
+          console.log("stepperEnd", selectedRows);
+          selectedRows = [];
+          alertselection.classList.add('hidden');
+          await stepper.setStepValidity(1, false);
+          await stepper.setStep(0);
+          await table.resetTable();
+         
+        });
+        // #endregion
+      });
+
+      async function onDelete(row) {
+        // llamado a api...
+      }
+      async function onSave(row) {
+        const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(row),
+        });
+        const json = await updatedRow.json();
+        console.log(json);
+      }
+    </script>
+  </body>
+</html>

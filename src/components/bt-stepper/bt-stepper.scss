@@ -7,9 +7,9 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   /* Colores base */
-  --main-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
-  --completed-bg: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
-  --invalid-bg: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
+  --main-bg: var(--primary-bg, #007bff);
+  --completed-bg: var(--success-bg, #28a745);
+  --invalid-bg: var(--danger-bg, #dc3545);
 
   --main-color: white;
   --completed-color: white;

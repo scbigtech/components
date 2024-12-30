@@ -98,7 +98,13 @@
       "email": "meaganpate@keeg.com",
       "phone": "+34 (812) 533-2748",
       "address": "255 Dunne Place, Klondike, Minnesota, 6171",
-      "about": "Exercitation cillum nostrud dolore officia sint. Culpa cillum non aliqua ipsum eiusmod ad nisi exercitation veniam fugiat aliqua. Enim amet pariatur est tempor voluptate anim eu dolore eu exercitation incididunt officia. Eiusmod exercitation pariatur in aliquip commodo qui aliqua laboris. Non mollit dolore velit duis ad. Occaecat consequat sunt aliqua aute.\r\n"
+      "about": "Exercitation cillum nostrud dolore officia sint. Culpa cillum non aliqua ipsum eiusmod ad nisi exercitation veniam fugiat aliqua. Enim amet pariatur est tempor voluptate anim eu dolore eu exercitation incididunt officia. Eiusmod exercitation pariatur in aliquip commodo qui aliqua laboris. Non mollit dolore velit duis ad. Occaecat consequat sunt aliqua aute.\r\n",
+      "partner": [
+        {
+          "id": "2",
+          "name": "Partner 2"
+        }
+      ]
     },
     {
       "id": "5f043d15-b17c-4590-9bcf-d343c0a0ea4b",

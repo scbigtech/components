@@ -7,12 +7,29 @@
 
 ## Events
 
-| Event  | Description | Type                  |
-| ------ | ----------- | --------------------- |
-| `step` |             | `CustomEvent<number>` |
+| Event        | Description | Type                  |
+| ------------ | ----------- | --------------------- |
+| `step`       |             | `CustomEvent<number>` |
+| `stepperEnd` |             | `CustomEvent<void>`   |
 
 
 ## Methods
+
+### `setStep(index: number) => Promise<void>`
+
+
+
+#### Parameters
+
+| Name    | Type     | Description |
+| ------- | -------- | ----------- |
+| `index` | `number` |             |
+
+#### Returns
+
+Type: `Promise<void>`
+
+
 
 ### `setStepValidity(index: number, isValid: boolean) => Promise<void>`
 

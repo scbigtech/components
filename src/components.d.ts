@@ -32,6 +32,7 @@ export namespace Components {
         "task": (cb: () => Promise<void>) => Promise<void>;
     }
     interface BtStepper {
+        "setStep": (index: number) => Promise<void>;
         "setStepValidity": (index: number, isValid: boolean) => Promise<void>;
     }
     interface BtTable {
@@ -39,9 +40,21 @@ export namespace Components {
         "applyAsyncSearch": () => Promise<any>;
         "config": { [key: string]: any };
         "getAllSelectedRows": () => Promise<{ [key: string]: any; }[]>;
-        "headers": { key: string; label: string; class: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[];
+        "headers": { 
+      key: string; 
+      label: string; 
+      class: string; 
+      cellClasses?: (cell: { [key: string]: any }) => string;
+      sortable?: boolean; 
+      filterable?: boolean; 
+      editable?: boolean; 
+      action?: boolean }[];
+        /**
+          * Flag to indicate if the table has async data handles search and pagination
+         */
         "isAsync": boolean;
         "pageSize": number;
+        "resetTable": () => Promise<void>;
         "rows": { [key: string]: any }[];
         "totalRows"?: number;
     }
@@ -125,6 +138,7 @@ declare global {
     };
     interface HTMLBtStepperElementEventMap {
         "step": number;
+        "stepperEnd": void;
     }
     interface HTMLBtStepperElement extends Components.BtStepper, HTMLStencilElement {
         addEventListener<K extends keyof HTMLBtStepperElementEventMap>(type: K, listener: (this: HTMLBtStepperElement, ev: BtStepperCustomEvent<HTMLBtStepperElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -203,11 +217,23 @@ declare namespace LocalJSX {
     }
     interface BtStepper {
         "onStep"?: (event: BtStepperCustomEvent<number>) => void;
+        "onStepperEnd"?: (event: BtStepperCustomEvent<void>) => void;
     }
     interface BtTable {
         "actions"?: { [key: string]: (row: { [key: string]: any }) => void };
         "config"?: { [key: string]: any };
-        "headers"?: { key: string; label: string; class: string; sortable?: boolean; filterable?: boolean; editable?: boolean; action?: boolean }[];
+        "headers"?: { 
+      key: string; 
+      label: string; 
+      class: string; 
+      cellClasses?: (cell: { [key: string]: any }) => string;
+      sortable?: boolean; 
+      filterable?: boolean; 
+      editable?: boolean; 
+      action?: boolean }[];
+        /**
+          * Flag to indicate if the table has async data handles search and pagination
+         */
         "isAsync"?: boolean;
         "onAction"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }; action: string }>) => void;
         "onEdit"?: (event: BtTableCustomEvent<{ header: string, row: { [key: string]: any } }>) => void;

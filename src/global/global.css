@@ -1,67 +1,27 @@
 :root {
   /* Color Tokens*/
-  --dark-hue: 0;
-  --dark-saturation: 0%;
-  --dark-lightness: 12.5%;
+  --text-color-dark: hsl(0, 0%, 12.5%);
+  --text-color-light: hsl(0, 0%, 100%);
 
-  --light-hue: 0;
-  --light-saturation: 0%;
-  --light-lightness: 100%;
-
-  --gray-hue: 0;
-  --gray-saturation: 0%;
-  --gray-lightness: 50%;
-
-  --primary-hue: 206.1;
-  --primary-saturation: 100%;
-  --primary-lightness: 39.2%;
-
-  --secondary-hue: 205.9;
-  --secondary-saturation: 100%;
-  --secondary-lightness: 17.3%;
-
-  --success-hue: 142.4;
-  --success-saturation: 71.8%;
-  --success-lightness: 29.2%;
-
-  --info-hue: 204.8;
-  --info-saturation: 100%;
-  --info-lightness: 52.5%;
-
-  --warning-hue: 43.1;
-  --warning-saturation: 100%;
-  --warning-lightness: 52.5%;
-
-  --danger-hue: 0;
-  --danger-saturation: 100%;
-  --danger-lightness: 50%;
-
-  --disabled-hue: 0;
-  --disabled-saturation: 0%;
-  --disabled-lightness: 50%;
-
-  --text-color-dark: hsl(var(--dark-hue), var(--dark-saturation), var(--dark-lightness));
-  --text-color-light: hsl(var(--light-hue), var(--light-saturation), var(--light-lightness));
-
-  --light-bg: hsl(var(--light-hue), var(--light-saturation), var(--light-lightness));
+  --light-bg: hsl(0, 0%, 100%);
   --light-color: var(--text-color-dark);
 
-  --dark-bg: hsl(var(--dark-hue), var(--dark-saturation), var(--dark-lightness));
+  --dark-bg: hsl(0, 0%, 12.5%);
   --dark-color: var(--text-color-light);
 
-  --primary-bg: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+  --primary-bg: hsl(206.1, 100%, 39.2%);
   --primary-color: var(--text-color-light);
 
-  --secondary-bg: hsl(var(--secondary-hue), var(--secondary-saturation), var(--secondary-lightness));
+  --secondary-bg: hsl(205.9, 100%, 17.3%);
   --secondary-color: var(--text-color-light);
 
-  --success-bg: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
+  --success-bg: hsl(142.4, 71.8%, 29.2%);
   --success-color: var(--text-color-light);
 
-  --danger-bg: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
+  --danger-bg: hsl(0, 100%, 50%);
   --danger-color: var(--text-color-light);
 
-  --disabled-bg: hsl(var(--disabled-hue), var(--disabled-saturation), var(--disabled-lightness));
+  --disabled-bg: hsl(0, 0%, 50%);
   --disabled-color: var(--text-color-light);
 
   /* Font Tokens */

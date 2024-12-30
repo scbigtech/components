@@ -1,50 +1,36 @@
+@use '../../global/utils.scss';
 :host {
   display: inline-block;
-  --button-hue: var(--primary-hue, 210);
-  --button-saturation: var(--primary-saturation, 100%);
-  --button-lightness: var(--primary-lightness, 50%);
-  --button-bg: hsl(var(--button-hue), var(--button-saturation), var(--button-lightness));
+  --button-bg: var(--primary-bg);
   --button-color: white;
+  --button-hover-bg: hsl(from var(--button-bg) h s calc(l / 1.5));
 
-  --button-hover-lightness: calc(var(--button-lightness) - 10%);
-  --button-hover-bg: hsl(var(--button-hue), var(--button-saturation), var(--button-hover-lightness));
-
-  --button-disabled-bg: hsl(var(--disabled-hue, 0), var(--disabled-saturation, 0%), var(--disabled-lightness, 50%));
-  --button-success-bg: hsl(var(--success-hue, 142.4), var(--success-saturation, 71.8%), var(--success-lightness, 29.2%));
+  --button-disabled-bg: var(--disabled-bg);
+  --button-success-bg: var(--success-bg);
 
   --icon-size: 1em;
   --spacing: 1rem;
   --rounded: 4px;
+  --active-scale: 0.9;
 }
 
 :host(.active) {
-  --button-bg: hsl(var(--secondary-hue, 205.9), var(--secondary-saturation, 100%), var(--secondary-lightness, 17.3%));
+  --button-bg: var(--secondary-bg);
+  transform: scale(var(--active-scale));
+  pointer-events: none;
 }
 
 :host(.danger) {
-  --button-bg: hsl(var(--danger-hue, 205.9), var(--danger-saturation, 100%), var(--danger-lightness, 17.3%));
+  --button-bg: var(--danger-bg);
 }
 
 :host(.success) {
-  --button-bg: hsl(var(--success-hue, 205.9), var(--success-saturation, 100%), var(--success-lightness, 17.3%));
+  --button-bg: var(--success-bg);
 }
 
 :host(.small) {
   --spacing: 0.25em;
 }
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 
 button {
   padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 0.75);
@@ -71,12 +57,15 @@ button:not(:disabled):hover .button__content {
 }
 
 button:not(:disabled):hover {
-  filter: brightness(90%);
+  background: var(--button-hover-bg);
+  & slot[name^='icon']::slotted(*){
+      animation: rotateandgrow .4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 button:not(:disabled):active {
   filter: brightness(100%);
-  transform: scale(0.95);
+  transform: scale(var(--active-scale));
 }
 
 
@@ -118,5 +107,17 @@ slot[name^='icon']::slotted(*) {
 
   100% {
     opacity: 0.5;
+  }
+}
+
+@keyframes rotateandgrow {
+  0% {
+    transform: rotate(90deg) scale(0);
+    transform-origin: center;
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+    transform-origin: center;
   }
 }

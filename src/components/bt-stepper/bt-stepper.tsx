@@ -12,6 +12,7 @@ export class BtStepper {
   @State() asyncAction: boolean = false;
 
   @Event() step: EventEmitter<number>;
+  @Event() stepperEnd: EventEmitter<void>;
 
   @Element() el!: HTMLElement;
 
@@ -33,6 +34,12 @@ export class BtStepper {
   componentDidLoad() {
     this.updateStep();
     this.step.emit(this.currentStep);
+  }
+
+  @Method()
+  async setStep(index: number) {
+    if (typeof index !== 'number') return;
+    this.goToStep(index);
   }
 
   /**
@@ -117,7 +124,8 @@ export class BtStepper {
    * @param direction The direction to change the step, 1 is forward and -1 is backward.
    */
   private changeStep(direction: number) {
-    if (!this.isStepValid(this.currentStep)) {
+    //check stepvalidity on current step only for next step
+    if (direction === 1 && !this.isStepValid(this.currentStep)) {
       console.warn(`Step ${this.currentStep} is invalid.`);
       return;
     }
@@ -194,6 +202,9 @@ export class BtStepper {
   private handleAsyncEnd() {
     this.asyncAction = false;
   }
+  private handleStepperEnd() {
+    this.stepperEnd.emit();
+  }
 
   render() {
     return (
@@ -253,7 +264,7 @@ export class BtStepper {
             </bt-button>
           )}
           {this.currentStep === this.steps.length - 1 && (
-            <bt-button id="finish" hideText success loading={this.asyncAction} disabled={!this.isStepValid(this.currentStep) || this.currentStep !== this.steps.length - 1}>
+            <bt-button id="finish" hideText success loading={this.asyncAction} disabled={!this.isStepValid(this.currentStep) || this.currentStep !== this.steps.length - 1} onClick={() => this.handleStepperEnd()}>
               Finish{' '}
               <svg
                 slot="icon-right"
