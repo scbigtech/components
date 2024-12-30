@@ -7,13 +7,6 @@
     <link rel="stylesheet" href="/build/components.css" />
     <script type="module" src="/build/components.esm.js"></script>
     <style>
-      /* :root {
-      --primary-hue: 352.8;
-      --primary-lightness: 43.9%;
-      --secondary-hue: 213.8;
-      --secondary-lightness: 25.1%;
-    } */
-
       body {
         font-size: 16px;
       }
@@ -53,6 +46,16 @@
 
       .success {
         --cell-bg-color: var(--success-bg);
+        color: white;
+      }
+
+      .danger {
+        --cell-bg-color: var(--danger-bg);
+        color: white;
+      }
+
+      .text-center {
+        text-align: center;
       }
     </style>
   </head>
@@ -145,9 +148,13 @@
             key: 'age',
             label: 'Edad',
             sortable: true,
+            filterable: true,
             class: 'w-50',
             cellClasses: cell => {
-              return cell.age < 18 ? 'danger' : 'success';
+              let classstring = 'text-center ';
+              if(cell < 25) classstring += 'danger'
+              if(cell > 25) classstring += 'success';
+              return classstring;
             },
           },
           { key: 'partner', label: 'Socio' },

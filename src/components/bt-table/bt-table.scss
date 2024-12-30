@@ -1,24 +1,4 @@
-:host {
-  --space: 1rem;
-  --bg-color: var(--primary-bg);
-  --cell-bg-color: transparent;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.hidden {
-  display: none;
-}
+@use '../../global/utils.scss';
 
 
 .toolbar {
@@ -26,8 +6,8 @@
   justify-content: space-between;
   align-items: flex-end;
   flex-direction: column;
-  gap: var(--space);
-  margin-bottom: var(--space);
+  gap: var(--spacing);
+  margin-bottom: var(--spacing);
 }
 
 .search-container {
@@ -67,7 +47,7 @@
 .page-size-selector {
   display: flex;
   align-items: flex-end;
-  gap: var(--space);
+  gap: var(--spacing);
   padding: var(--spacing-xs) var(--spacing-sm);
   border: 1px solid #ddd;
   border-radius: var(--border-radius);
@@ -75,7 +55,7 @@
   & select {
     appearance: none;
     border: none;
-    padding: 2px var(--space);
+    padding: 2px var(--spacing);
 
     &:hover {
       cursor: pointer;
@@ -95,11 +75,12 @@
 }
 
 table {
+  --cell-bg-color: transparent;
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   counter-reset: rowNumber;
-  margin-bottom: var(--space);
+  margin-bottom: var(--spacing);
 }
 
 th,
@@ -153,7 +134,7 @@ th input[type="text"] {
 .pagination {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--space);
+  margin-bottom: var(--spacing);
 
   &-info {
     display: flex;

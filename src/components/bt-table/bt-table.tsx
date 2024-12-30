@@ -3,7 +3,7 @@ import { Component, Event, EventEmitter, Fragment, Listen, Method, Prop, State, 
 @Component({
   tag: 'bt-table',
   styleUrl: 'bt-table.scss',
-  shadow: true,
+  shadow: false,
 })
 export class BtTable {
   @Prop() headers: {
@@ -99,6 +99,10 @@ export class BtTable {
     return this.rows.filter(row => this.selectedRows.has(row.id));
   }
 
+  @Method()
+  async getAllFilteredRows(): Promise<{ [key: string]: any }[]> {
+    return this.filteredRows;
+  }
   /**
    * Applies the filters to the table when the 'isAsync' property is set to true.
    * If the 'isAsync' property is set to false, a warning is logged to the console.
@@ -209,7 +213,7 @@ export class BtTable {
 
   private handleColumnFilterChange(header: string, event: Event) {
     const input = event.target as HTMLInputElement;
-    this.columnFilters = { ...this.columnFilters, [header]: input.value.toLowerCase() };
+    this.columnFilters = { ...this.columnFilters, [header]: typeof input.value === 'string' ? input.value.toLowerCase() : input.value };
     this.applyFilters();
     this.filter.emit({ filters: this.columnFilters });
   }
@@ -218,14 +222,14 @@ export class BtTable {
     let rows = [...this.rows];
 
     // Global search filter
-    if (this.searchText) {
+    if (this.searchText && this.searchText.length > 0) {
       rows = rows.filter(row => Object.values(row).join(' ').toLowerCase().includes(this.searchText));
     }
 
     // Column-specific filters
     Object.entries(this.columnFilters).forEach(([key, value]) => {
       if (value) {
-        rows = rows.filter(row => row[key]?.toLowerCase().includes(value));
+        rows = rows.filter(row => this.evaluateFilter(row[key], value));
       }
     });
 
@@ -239,11 +243,86 @@ export class BtTable {
         return 0;
       });
     }
+
     this.filteredRows = rows;
     this.currentPage = 1;
     this.internalTotalRows = this.filteredRows.length;
   }
 
+  private evaluateFilter(columnValue: any, filterValue: string): boolean {
+    // Regex para detectar combinaciones de operadores
+    const combinedMatch = filterValue.match(/^\[(.+?)\]$/);
+    if (combinedMatch) {
+      const expressions = combinedMatch[1].split('&&').map(exp => exp.trim());
+      return expressions.every(expression => this.evaluateSingleCondition(columnValue, expression));
+    }
+
+    // Si no es una combinación, evaluar como una sola condición
+    return this.evaluateSingleCondition(columnValue, filterValue);
+  }
+
+  /**
+   * Evalúa una sola condición.
+   */
+  private evaluateSingleCondition(columnValue: any, condition: string): boolean {
+    // Regex para identificar operadores avanzados
+    const match = condition.match(/^\s*(\$(eq|ne|lt|lte|gt|gte|regex|nregex)):\s*(.+)\s*$/i);
+    if (match) {
+      const operator = match[1].toLowerCase(); // Operador como $eq, $lt, etc.
+      const value = match[3].trim(); // Valor para comparar
+
+      if (typeof columnValue === 'number') {
+        const numberValue = parseFloat(value);
+        if (isNaN(numberValue)) return false; // Validar que el valor sea numérico
+
+        switch (operator) {
+          case '$eq':
+            return columnValue === numberValue;
+          case '$ne':
+            return columnValue !== numberValue;
+          case '$lt':
+            return columnValue < numberValue;
+          case '$lte':
+            return columnValue <= numberValue;
+          case '$gt':
+            return columnValue > numberValue;
+          case '$gte':
+            return columnValue >= numberValue;
+          default:
+            return false;
+        }
+      }
+
+      if (typeof columnValue === 'string') {
+        const columnText = columnValue.toLowerCase();
+        const regexValue = value.toLowerCase();
+
+        switch (operator) {
+          case '$eq':
+            return columnText === regexValue;
+          case '$ne':
+            return columnText !== regexValue;
+          case '$regex':
+            return new RegExp(regexValue, 'i').test(columnText);
+          case '$nregex':
+            return !new RegExp(regexValue, 'i').test(columnText);
+          default:
+            return false;
+        }
+      }
+    }
+
+    // Comparación por defecto
+    if (typeof columnValue === 'string') {
+      return columnValue.toLowerCase().includes(condition.toLowerCase());
+    }
+
+    if (typeof columnValue === 'number') {
+      return columnValue.toString().includes(condition);
+    }
+
+    return false; // Caso no reconocido
+  }
   private async handleRowSelection(id: string) {
     const selected = new Set(this.selectedRows);
     if (selected.has(id)) {

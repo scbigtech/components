@@ -1,5 +1,6 @@
 import { Component, Element, Event, EventEmitter, Host, Listen, Prop, State, h } from '@stencil/core';
 import { icons } from '../../assets/icons.js';
+import { OverflowFinder} from '../../utils/utils';
 
 @Component({
   tag: 'bt-dropdown',
@@ -35,6 +36,7 @@ export class BtDropdown {
   }
 
   getDropdownPosition() {
+    const overflowparent = OverflowFinder.find(this.el) || window;
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -42,7 +44,7 @@ export class BtDropdown {
             const dropdownMenu = this.el.shadowRoot?.querySelector('.dropdown-menu');
             if (dropdownMenu) {
               const rect = dropdownMenu.getBoundingClientRect();
-              if (rect.right > window.innerWidth) {
+              if (rect.right > overflowparent.offsetWidth) {
                 dropdownMenu.classList.add('right');
               }
               if (rect.left < 0) {
@@ -51,7 +53,7 @@ export class BtDropdown {
               if (rect.top < 0) {
                 dropdownMenu.classList.add('top');
               }
-              if (rect.bottom > window.innerHeight) {
+              if (rect.bottom > overflowparent.offsetWidth) {
                 dropdownMenu.classList.add('bottom');
               }
 

@@ -46,6 +46,7 @@ export namespace Components {
          */
         "applyAsyncSearch": () => Promise<void>;
         "config": { [key: string]: any };
+        "getAllFilteredRows": () => Promise<{ [key: string]: any; }[]>;
         /**
           * Returns all selected rows.
           * @returns
