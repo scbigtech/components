@@ -10,6 +10,7 @@ export class BtTable {
     key: string;
     label: string;
     class: string;
+    type: 'string' | 'number' | 'complex';
     cellClasses?: (cell: { [key: string]: any }) => string;
     sortable?: boolean;
     filterable?: boolean;
@@ -150,6 +151,7 @@ export class BtTable {
     }
 
     this.filteredRows = [...this.rows];
+    this.applyFilters();
   }
 
   private validateRows(): boolean {
@@ -211,9 +213,9 @@ export class BtTable {
     this.sort.emit(this.sortConfig);
   }
 
-  private handleColumnFilterChange(header: string, event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.columnFilters = { ...this.columnFilters, [header]: typeof input.value === 'string' ? input.value.toLowerCase() : input.value };
+  private handleColumnFilterChange(header: string, event: CustomEvent<any>) {
+    const regex = event.detail; // Regex generado por el dropdown
+    this.columnFilters = { ...this.columnFilters, [header]: regex };
     this.applyFilters();
     this.filter.emit({ filters: this.columnFilters });
   }
@@ -229,6 +231,7 @@ export class BtTable {
     // Column-specific filters
     Object.entries(this.columnFilters).forEach(([key, value]) => {
       if (value) {
+        
         rows = rows.filter(row => this.evaluateFilter(row[key], value));
       }
     });
@@ -264,7 +267,7 @@ export class BtTable {
   /**
    * Evalúa una sola condición.
    */
-  private evaluateSingleCondition(columnValue: any, condition: string): boolean {
+  private evaluateSingleCondition(columnValue: number | string, condition: string): boolean {
     // Regex para identificar operadores avanzados
     const match = condition.match(/^\s*(\$(eq|ne|lt|lte|gt|gte|regex|nregex)):\s*(.+)\s*$/i);
     if (match) {
@@ -607,14 +610,15 @@ export class BtTable {
                       </span>
                       {header.filterable && (
                         <Fragment>
-                          <label class="sr-only" htmlFor="column-filter">{`${this.config.filter} ${header}`}</label>
+                          {/* <label class="sr-only" htmlFor="column-filter">{`${this.config.filter} ${header}`}</label>
                           <input
                             id="column-filter"
                             type="text"
                             placeholder={`${this.config.filter} ${header.key}`}
                             value={this.columnFilters[header.key]}
-                            onInput={event => this.handleColumnFilterChange(header.key, event)}
-                          />
+                            onChange={event => this.handleColumnFilterChange(header.key, event)}
+                          /> */}
+                          <bt-column-search type={header.type} onFilterChange={(event: CustomEvent) => this.handleColumnFilterChange(header.key, event)}></bt-column-search>
                         </Fragment>
                       )}
                     </div>
@@ -628,7 +632,7 @@ export class BtTable {
               </tr>
             </thead>
             <tbody>
-              {this.paginatedRows.map(row => (
+              {this.paginatedRows.map((row, i, arr) => (
                 <tr data-id={row.id}>
                   <td class="selectioncell" headers={this.config.select}>
                     <label class="sr-only" htmlFor={row.id}>
@@ -649,7 +653,7 @@ export class BtTable {
                   ))}
                   {Object.keys(this.actions).length > 0 && (
                     <td class="actionscell" headers={this.config.actions}>
-                      <bt-dropdown options={this.actions}></bt-dropdown>
+                      <bt-dropdown options={this.actions} x="right" y={i === arr.length - 1 ? 'top' : 'bottom'}></bt-dropdown>
                     </td>
                   )}
                 </tr>

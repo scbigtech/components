@@ -54,8 +54,10 @@
         color: white;
       }
 
-      .text-center {
-        text-align: center;
+      @media screen and (min-width: 768px) {
+        .ageCell {
+          text-align: center;
+        }
       }
     </style>
   </head>
@@ -151,9 +153,9 @@
             filterable: true,
             class: 'w-50',
             cellClasses: cell => {
-              let classstring = 'text-center ';
-              if(cell < 25) classstring += 'danger'
-              if(cell > 25) classstring += 'success';
+              let classstring = 'ageCell ';
+              if (cell < 25) classstring += 'danger';
+              if (cell > 25) classstring += 'success';
               return classstring;
             },
           },
@@ -198,7 +200,7 @@
             label: 'Guardar',
             class: 'success',
             icon: '<svg  slot="icon-right" xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2zM7 5h4v2h2V5h2v4H7V5zm0 8h10v6H7v-6z"></path></svg>',
-            handler: async row => {
+            handler: async (row) => {
               const updatedRow = await fetch(`http://localhost:3000/users/${row.id}`, {
                 method: 'PUT',
                 headers: {

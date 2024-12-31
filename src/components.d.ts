@@ -16,8 +16,14 @@ export namespace Components {
         "success": boolean;
         "validate"?: boolean;
     }
+    interface BtColumnSearch {
+        "type": 'string' | 'number' | 'complex';
+    }
     interface BtDropdown {
+        "buttonProps": { [key: string]: any };
         "options": { [key: string]: any };
+        "x": 'left' | 'right';
+        "y": 'top' | 'bottom';
     }
     /**
      * TODO: revisar este componente , asignarle un identificador unico
@@ -56,6 +62,7 @@ export namespace Components {
     key: string;
     label: string;
     class: string;
+    type: 'string' | 'number' | 'complex';
     cellClasses?: (cell: { [key: string]: any }) => string;
     sortable?: boolean;
     filterable?: boolean;
@@ -75,6 +82,10 @@ export namespace Components {
 export interface BtButtonCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLBtButtonElement;
+}
+export interface BtColumnSearchCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLBtColumnSearchElement;
 }
 export interface BtDropdownCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -113,6 +124,23 @@ declare global {
     var HTMLBtButtonElement: {
         prototype: HTMLBtButtonElement;
         new (): HTMLBtButtonElement;
+    };
+    interface HTMLBtColumnSearchElementEventMap {
+        "filterChange": string;
+    }
+    interface HTMLBtColumnSearchElement extends Components.BtColumnSearch, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLBtColumnSearchElementEventMap>(type: K, listener: (this: HTMLBtColumnSearchElement, ev: BtColumnSearchCustomEvent<HTMLBtColumnSearchElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLBtColumnSearchElementEventMap>(type: K, listener: (this: HTMLBtColumnSearchElement, ev: BtColumnSearchCustomEvent<HTMLBtColumnSearchElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLBtColumnSearchElement: {
+        prototype: HTMLBtColumnSearchElement;
+        new (): HTMLBtColumnSearchElement;
     };
     interface HTMLBtDropdownElementEventMap {
         "action": any;
@@ -214,6 +242,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "bt-button": HTMLBtButtonElement;
+        "bt-column-search": HTMLBtColumnSearchElement;
         "bt-dropdown": HTMLBtDropdownElement;
         "bt-multiselect": HTMLBtMultiselectElement;
         "bt-step-item": HTMLBtStepItemElement;
@@ -236,9 +265,16 @@ declare namespace LocalJSX {
         "success"?: boolean;
         "validate"?: boolean;
     }
+    interface BtColumnSearch {
+        "onFilterChange"?: (event: BtColumnSearchCustomEvent<string>) => void;
+        "type"?: 'string' | 'number' | 'complex';
+    }
     interface BtDropdown {
+        "buttonProps"?: { [key: string]: any };
         "onAction"?: (event: BtDropdownCustomEvent<any>) => void;
         "options"?: { [key: string]: any };
+        "x"?: 'left' | 'right';
+        "y"?: 'top' | 'bottom';
     }
     /**
      * TODO: revisar este componente , asignarle un identificador unico
@@ -265,6 +301,7 @@ declare namespace LocalJSX {
     key: string;
     label: string;
     class: string;
+    type: 'string' | 'number' | 'complex';
     cellClasses?: (cell: { [key: string]: any }) => string;
     sortable?: boolean;
     filterable?: boolean;
@@ -289,6 +326,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "bt-button": BtButton;
+        "bt-column-search": BtColumnSearch;
         "bt-dropdown": BtDropdown;
         "bt-multiselect": BtMultiselect;
         "bt-step-item": BtStepItem;
@@ -301,6 +339,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "bt-button": LocalJSX.BtButton & JSXBase.HTMLAttributes<HTMLBtButtonElement>;
+            "bt-column-search": LocalJSX.BtColumnSearch & JSXBase.HTMLAttributes<HTMLBtColumnSearchElement>;
             "bt-dropdown": LocalJSX.BtDropdown & JSXBase.HTMLAttributes<HTMLBtDropdownElement>;
             /**
              * TODO: revisar este componente , asignarle un identificador unico

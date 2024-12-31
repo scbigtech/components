@@ -113,14 +113,14 @@
         const table = document.getElementById('table2');
         const tableselected = document.getElementById('tableOfSelectedElements');
         const headers = [
-          { key: 'name', label: 'Name', sortable: true, editable: true },
-          { key: 'age', label: 'Age', sortable: true, class: 'w-50', editable: true, cellClasses: (cell)=> {
-            return cell.age < 18 ? 'danger' : 'success'
+          { key: 'name', label: 'Name', type: 'string', sortable: true, filterable: true },
+          { key: 'age', label: 'Age', type:'number', sortable: true, class: 'w-50', filterable: true, cellClasses: (age)=> {
+            return age < 40 ? 'danger' : 'success'
             
           }},
-          { key: 'partner', label: 'Partner' },
-          { key: 'company', label: 'Company' },
-          { key: 'contact', label: 'Contact' },
+          { key: 'partner', label: 'Partner', type: 'complex' },
+          { key: 'company', label: 'Company', type: 'string' },
+          { key: 'contact', label: 'Contact', type: 'complex' },
         ];
 
         table.headers = headers;

@@ -1,9 +1,16 @@
-bt-button {
-  --button-bg: transparent;
-  --button-color: black;
+:host {
+  display: inline-block;
 }
 
+
+
 .dropdown {
+
+  & bt-button {
+    --button-bg: transparent;
+    --button-color: black;
+  }
+
   position: relative;
 
   &-menu {

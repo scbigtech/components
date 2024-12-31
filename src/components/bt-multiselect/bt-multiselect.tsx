@@ -46,7 +46,7 @@ export class MultiSelectmultiselect {
     this.multiselectChange.emit(this._selectedOptions);
   }
 
-  @Listen('click', { target: 'window' })
+  @Listen('click', {})
   handleClickOutside(event: Event) {
     const path = (event.composedPath && event.composedPath()) || (event as any).path;
     if (path?.includes(this.el)) {

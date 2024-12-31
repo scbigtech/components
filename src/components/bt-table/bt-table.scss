@@ -1,6 +1,5 @@
 @use '../../global/utils.scss';
 
-
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -26,7 +25,7 @@
 
   & input {
     width: 100%;
-    padding: .5rem;
+    padding: 0.5rem;
     padding-right: 2.5rem;
     border: 0;
     border: 1px solid #ddd;
@@ -40,7 +39,7 @@
     transform: translateY(-50%) scale(0.8);
     width: 24px;
     height: 24px;
-    opacity: .5;
+    opacity: 0.5;
   }
 }
 
@@ -62,16 +61,14 @@
       background: #f2f2f2;
     }
   }
-
 }
 
 .table-wrapper {
   overflow-x: auto;
 }
 
-[part="heading-1"] {
+[part='heading-1'] {
   text-align: left;
-
 }
 
 table {
@@ -94,21 +91,21 @@ td {
 th {
   background-color: #f2f2f2;
 
-  &>div {
+  & > div {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
   }
 
-  .header-title{
+  .header-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex: 1;
   }
 
-  & .sort-icon{
+  & .sort-icon {
     display: inline-block;
     width: 1rem;
     height: 1rem;
@@ -123,7 +120,7 @@ tr {
   }
 }
 
-th input[type="text"] {
+th input[type='text'] {
   width: auto;
   padding: 8px;
   border: 0;
@@ -177,7 +174,6 @@ th input[type="text"] {
     color: var(--success-bg);
     font-weight: bold;
   }
-
 }
 
 tbody tr:has(.selection-checkbox:checked) {
@@ -191,6 +187,24 @@ tbody .actions {
   gap: 0.5rem;
 }
 
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-type-dropdown {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.filter-container input {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 @media screen and (min-width: 768px) {
   .toolbar {
     flex-direction: row;
@@ -198,8 +212,9 @@ tbody .actions {
 }
 
 @media screen and (max-width: 768px) {
-  table, tbody {
-    display: block;  
+  table,
+  tbody {
+    display: block;
   }
 
   thead {
@@ -211,7 +226,7 @@ tbody .actions {
     border: 1px solid #ddd;
     margin-bottom: 1rem;
 
-    &:nth-child(even){
+    &:nth-child(even) {
       background-color: inherit;
     }
   }
@@ -223,7 +238,7 @@ tbody .actions {
     flex-direction: column;
     gap: 0.5rem;
     border-bottom: 1px solid #ddd;
-   
+
     &::before {
       content: attr(data-label);
       font-weight: bold;
@@ -239,13 +254,13 @@ tbody .actions {
     order: 0;
     background-color: #f5f5f5;
   }
-  td:last-child{
+  td:last-child {
     text-align: right;
   }
 
   footer {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

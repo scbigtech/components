@@ -9,7 +9,17 @@
       "email": "melodyclark@BIGMAT.com",
       "phone": "+34 (918) 413-3984",
       "address": "974 Thatford Avenue, Manila, Arizona, 743",
-      "about": "Excepteur reprehenderit aliqua voluptate voluptate deserunt excepteur sit do in ullamco. Officia incididunt ex anim nostrud sit anim sit excepteur sunt minim consequat amet esse. Fugiat nisi non qui ad dolore sint. Sunt anim sit elit velit mollit esse minim cillum veniam. Labore quis mollit qui qui sit amet et incididunt veniam quis nulla veniam.\r\n"
+      "about": "Excepteur reprehenderit aliqua voluptate voluptate deserunt excepteur sit do in ullamco. Officia incididunt ex anim nostrud sit anim sit excepteur sunt minim consequat amet esse. Fugiat nisi non qui ad dolore sint. Sunt anim sit elit velit mollit esse minim cillum veniam. Labore quis mollit qui qui sit amet et incididunt veniam quis nulla veniam.\r\n",
+      "partner": [
+        {
+          "id": "2",
+          "name": "Partner 2"
+        },
+        {
+          "id": "3",
+          "name": "Partner 3"
+        }
+      ]
     },
     {
       "id": "42c9cced-a3f3-44ec-b26e-7874034d4d56",
