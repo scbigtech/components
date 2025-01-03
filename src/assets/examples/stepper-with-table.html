@@ -129,9 +129,7 @@
 
       async function updateRows(rows, tableid) {
         const table = document.getElementById(tableid);
-        const mappedRows = mapRows(rows);
-        table.totalRows = mappedRows.length;
-        table.rows = [...mappedRows];
+        table.rows = [...rows];
       }
       window.addEventListener('load', async () => {
         // #region Table
@@ -158,6 +156,7 @@
               if (cell > 25) classstring += 'success';
               return classstring;
             },
+            type: 'number',
           },
           { key: 'partner', label: 'Socio' },
           { key: 'company', label: 'Empresa' },
@@ -182,7 +181,9 @@
         };
         table.config = config;
         table.headers = headers;
+        table.mapper = mapRows;
         tableselected.headers = headers;
+        tableselected.mapper = mapRows;
 
         await updateRows(rows, 'table2');
 
@@ -228,8 +229,7 @@
         table.addEventListener('selection', async event => {
           console.log('Filas seleccionadas:', event.detail);
           const affectedRows = event.detail.selectedRows || event.detail;
-          const affectedIds = affectedRows.map(r => r.id);
-          selectedRows = rows.filter(row => affectedIds.includes(row.id));
+          selectedRows = [...affectedRows];
           if (selectedRows.length) {
             alertselection.classList.add('hidden');
             stepper.setStepValidity(1, true);
@@ -249,9 +249,9 @@
           table.applyAsyncSearch();
         });
         table.addEventListener('cell-action', ({ detail }) => {
-          const { rowId, action } = detail;
+          const { row, action } = detail;
           const handler = action.handler;
-          handler(rows.find(r => r.id === rowId));
+          handler(row);
         });
         table.addEventListener('edit', async event => {
           const editedrow = event.detail;

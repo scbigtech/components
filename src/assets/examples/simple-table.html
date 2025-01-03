@@ -51,9 +51,7 @@
 
   <body>
     <div class="container">
-      <bt-table id="table2" page-size="5">
-      </bt-table>
-    
+      <bt-table id="table2" page-size="5"> </bt-table>
     </div>
 
     <script type="module">
@@ -70,14 +68,6 @@
         return json;
       }
 
-      function getPartners() {
-        return JSON.stringify([
-          { id: '1', name: 'Partner 1' },
-          { id: '2', name: 'Partner 2' },
-          { id: '3', name: 'Partner 3' },
-        ]);
-      }
-
       function mapRows(rows) {
         return rows.map(row => {
           return {
@@ -85,8 +75,12 @@
             name: row.name,
             age: row.age,
             company: row.company,
-            partner: `
-              <bt-multiselect key="${row.id}-partner" options='${getPartners()}' selected-options='${JSON.stringify(row.partner || [])}'></bt-multiselect>
+            gender: `
+            ${
+              row.gender === 'male'
+                ? '<svg style="color: blue; width: 24px; height: 24px"  xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 14m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0" /><path d="M19 5l-5.4 5.4" /><path d="M19 5h-5" /><path d="M19 5v5" /></svg>'
+                : '<svg style="color: red; width: 24px; height: 24px" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0" /><path d="M12 14v7" /><path d="M9 18h6" /></svg>'
+            }
             `,
             contact: `
             <ul class="contact">
@@ -100,30 +94,44 @@
 
       async function updateRows(rows, tableid) {
         const table = document.getElementById(tableid);
-        const mappedRows = mapRows(rows);
-        table.totalRows = rows.length;
-        table.rows = [...mappedRows];
+        table.rows = [...rows];
       }
       window.addEventListener('load', async () => {
         // #region Table
         const rows = await getData('http://localhost:3000/users');
-        // console.log(rows);
         if (!rows) return;
 
         const table = document.getElementById('table2');
         const tableselected = document.getElementById('tableOfSelectedElements');
         const headers = [
           { key: 'name', label: 'Name', type: 'string', sortable: true, filterable: true },
-          { key: 'age', label: 'Age', type:'number', sortable: true, class: 'w-50', filterable: true, cellClasses: (age)=> {
-            return age < 40 ? 'danger' : 'success'
-            
-          }},
-          { key: 'partner', label: 'Partner', type: 'complex' },
+          {
+            key: 'age',
+            label: 'Age',
+            type: 'number',
+            sortable: true,
+            class: 'w-50',
+            filterable: true,
+            cellClasses: age => {
+              return age < 40 ? 'danger' : 'success';
+            },
+          },
+          {
+            key: 'gender',
+            label: 'Gender',
+            type: 'select',
+            filterable: true,
+            options: [
+              { label: 'Male', value: 'male' },
+              { label: 'Female', value: 'female' },
+            ],
+          },
           { key: 'company', label: 'Company', type: 'string' },
-          { key: 'contact', label: 'Contact', type: 'complex' },
+          { key: 'contact', label: 'Contact', type: 'html' },
         ];
 
         table.headers = headers;
+        table.mapper = mapRows;
 
         await updateRows(rows, 'table2');
       });

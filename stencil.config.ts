@@ -1,7 +1,6 @@
 import { Config } from '@stencil/core';
 import { postcss } from '@stencil-community/postcss';
 import autoprefixer from 'autoprefixer';
-import postcssEnv from 'postcss-env-function';
 import { sass } from '@stencil/sass';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 
@@ -31,7 +30,6 @@ export const config: Config = {
     postcss({
       plugins: [
         autoprefixer(),
-        postcssEnv()
       ]
     }),
     nodePolyfills(),

@@ -13,7 +13,7 @@ export class BtDropdown {
   @Prop() buttonProps: { [key: string]: any } = {};
   @State() isOpen: boolean = false;
   @Element() el: HTMLElement;
-  @Event({ eventName: 'action', composed: true, bubbles: true }) onAction: EventEmitter<any>;
+  @Event({ eventName: 'action' }) onAction: EventEmitter<any>;
 
   @Listen('click', {target: 'window'})
   handleClickOutside(event: Event) {
@@ -30,6 +30,7 @@ export class BtDropdown {
 
   private handleClick(key: string) {
     this.isOpen = false;
+    console.log(this.options, key)
     this.onAction.emit({ ...this.options[key], key });
   }
 

@@ -17,7 +17,8 @@ export namespace Components {
         "validate"?: boolean;
     }
     interface BtColumnSearch {
-        "type": 'string' | 'number' | 'complex';
+        "options": { label: string; value: string }[];
+        "type": 'string' | 'number' | 'select' | 'html';
     }
     interface BtDropdown {
         "buttonProps": { [key: string]: any };
@@ -62,7 +63,8 @@ export namespace Components {
     key: string;
     label: string;
     class: string;
-    type: 'string' | 'number' | 'complex';
+    type: 'string' | 'number' | 'select' | 'html';
+    options?: { label: string; value: string }[];
     cellClasses?: (cell: { [key: string]: any }) => string;
     sortable?: boolean;
     filterable?: boolean;
@@ -73,6 +75,7 @@ export namespace Components {
           * Flag to indicate if the table has async data handles search and pagination
          */
         "isAsync": boolean;
+        "mapper": (rows: { [key: string]: any; }[]) => { [key: string]: any; }[];
         "pageSize": number;
         "resetTable": () => Promise<void>;
         "rows": { [key: string]: any }[];
@@ -223,7 +226,7 @@ declare global {
         "pagination": { [key: string]: any };
         "sort": { key: string; direction: 'asc' | 'desc' | undefined };
         "filter": { filters: { [key: string]: string } };
-        "cell-action": { rowId: string; action: string };
+        "cell-action": { row: { [key: string]: any }; action: string };
         "edit": { header: string; row: { [key: string]: any } };
     }
     interface HTMLBtTableElement extends Components.BtTable, HTMLStencilElement {
@@ -267,7 +270,8 @@ declare namespace LocalJSX {
     }
     interface BtColumnSearch {
         "onFilterChange"?: (event: BtColumnSearchCustomEvent<string>) => void;
-        "type"?: 'string' | 'number' | 'complex';
+        "options"?: { label: string; value: string }[];
+        "type"?: 'string' | 'number' | 'select' | 'html';
     }
     interface BtDropdown {
         "buttonProps"?: { [key: string]: any };
@@ -301,7 +305,8 @@ declare namespace LocalJSX {
     key: string;
     label: string;
     class: string;
-    type: 'string' | 'number' | 'complex';
+    type: 'string' | 'number' | 'select' | 'html';
+    options?: { label: string; value: string }[];
     cellClasses?: (cell: { [key: string]: any }) => string;
     sortable?: boolean;
     filterable?: boolean;
@@ -312,7 +317,8 @@ declare namespace LocalJSX {
           * Flag to indicate if the table has async data handles search and pagination
          */
         "isAsync"?: boolean;
-        "onCell-action"?: (event: BtTableCustomEvent<{ rowId: string; action: string }>) => void;
+        "mapper"?: (rows: { [key: string]: any; }[]) => { [key: string]: any; }[];
+        "onCell-action"?: (event: BtTableCustomEvent<{ row: { [key: string]: any }; action: string }>) => void;
         "onEdit"?: (event: BtTableCustomEvent<{ header: string; row: { [key: string]: any } }>) => void;
         "onFilter"?: (event: BtTableCustomEvent<{ filters: { [key: string]: string } }>) => void;
         "onPage-size"?: (event: BtTableCustomEvent<{ [key: string]: any }>) => void;

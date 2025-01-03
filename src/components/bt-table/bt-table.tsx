@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Fragment, Listen, Method, Prop, State, Watch, h } from '@stencil/core';
+import { Component, Event, EventEmitter, Fragment, Method, Prop, State, Watch, h } from '@stencil/core';
 
 @Component({
   tag: 'bt-table',
@@ -10,7 +10,8 @@ export class BtTable {
     key: string;
     label: string;
     class: string;
-    type: 'string' | 'number' | 'complex';
+    type: 'string' | 'number' | 'select' | 'html';
+    options?: { label: string; value: string }[];
     cellClasses?: (cell: { [key: string]: any }) => string;
     sortable?: boolean;
     filterable?: boolean;
@@ -18,6 +19,7 @@ export class BtTable {
     action?: boolean;
   }[] = [];
   @Prop() rows: { [key: string]: any }[] = [];
+  @Prop() mapper = (rows: { [key: string]: any }[]) => rows;
   @Prop() actions: { [key: string]: (row: { [key: string]: any }) => void } = {};
   /**
    * Flag to indicate if the table has async data
@@ -83,7 +85,7 @@ export class BtTable {
   @Event({ composed: true, bubbles: true }) pagination: EventEmitter<{ [key: string]: any }>;
   @Event({ composed: true, bubbles: true }) sort: EventEmitter<{ key: string; direction: 'asc' | 'desc' | undefined }>;
   @Event({ composed: true, bubbles: true }) filter: EventEmitter<{ filters: { [key: string]: string } }>;
-  @Event({ eventName: 'cell-action', composed: true, bubbles: true }) onCellAction: EventEmitter<{ rowId: string; action: string }>;
+  @Event({ eventName: 'cell-action', composed: true, bubbles: true }) onCellAction: EventEmitter<{ row: { [key: string]: any }; action: string }>;
   @Event({ eventName: 'edit', composed: true, bubbles: true }) cellEdit: EventEmitter<{ header: string; row: { [key: string]: any } }>;
 
   @Watch('rows')
@@ -127,11 +129,11 @@ export class BtTable {
     this.selectedRows = this.initialState.selectedRows;
   }
 
-  @Listen('action')
   emitCellAction(event: CustomEvent<any>) {
     const target = event.composedPath().find(r => (r as HTMLElement).tagName === 'TR');
     const row = this.rows.find(r => r.id === (target as HTMLElement).dataset.id);
-    this.onCellAction.emit({ rowId: row.id, action: event.detail });
+    if (!row) return;
+    this.onCellAction.emit({ row, action: event.detail });
   }
 
   componentWillLoad() {
@@ -149,8 +151,7 @@ export class BtTable {
     } else {
       this.internalTotalRows = this.totalRows;
     }
-
-    this.filteredRows = [...this.rows];
+    this.filteredRows = this.mapper(this.rows);
     this.applyFilters();
   }
 
@@ -214,7 +215,7 @@ export class BtTable {
   }
 
   private handleColumnFilterChange(header: string, event: CustomEvent<any>) {
-    const regex = event.detail; // Regex generado por el dropdown
+    const regex = (event as CustomEvent<any>).detail
     this.columnFilters = { ...this.columnFilters, [header]: regex };
     this.applyFilters();
     this.filter.emit({ filters: this.columnFilters });
@@ -231,7 +232,6 @@ export class BtTable {
     // Column-specific filters
     Object.entries(this.columnFilters).forEach(([key, value]) => {
       if (value) {
-        
         rows = rows.filter(row => this.evaluateFilter(row[key], value));
       }
     });
@@ -247,7 +247,7 @@ export class BtTable {
       });
     }
 
-    this.filteredRows = rows;
+    this.filteredRows = this.mapper(rows);
     this.currentPage = 1;
     this.internalTotalRows = this.filteredRows.length;
   }
@@ -259,7 +259,6 @@ export class BtTable {
       const expressions = combinedMatch[1].split('&&').map(exp => exp.trim());
       return expressions.every(expression => this.evaluateSingleCondition(columnValue, expression));
     }
-
     // Si no es una combinación, evaluar como una sola condición
     return this.evaluateSingleCondition(columnValue, filterValue);
   }
@@ -268,53 +267,39 @@ export class BtTable {
    * Evalúa una sola condición.
    */
   private evaluateSingleCondition(columnValue: number | string, condition: string): boolean {
-    // Regex para identificar operadores avanzados
-    const match = condition.match(/^\s*(\$(eq|ne|lt|lte|gt|gte|regex|nregex)):\s*(.+)\s*$/i);
+    if (typeof condition !== 'string') return true;
+
+    const operatorRegex = /^\s*(\$(eq|ne|lt|lte|gt|gte|regex|nregex)):\s*(.*)\s*$/i;
+    const match = condition.match(operatorRegex);
     if (match) {
-      const operator = match[1].toLowerCase(); // Operador como $eq, $lt, etc.
-      const value = match[3].trim(); // Valor para comparar
-
-      if (typeof columnValue === 'number') {
-        const numberValue = parseFloat(value);
-        if (isNaN(numberValue)) return false; // Validar que el valor sea numérico
-
-        switch (operator) {
-          case '$eq':
-            return columnValue === numberValue;
-          case '$ne':
-            return columnValue !== numberValue;
-          case '$lt':
-            return columnValue < numberValue;
-          case '$lte':
-            return columnValue <= numberValue;
-          case '$gt':
-            return columnValue > numberValue;
-          case '$gte':
-            return columnValue >= numberValue;
-          default:
-            return false;
-        }
-      }
-
-      if (typeof columnValue === 'string') {
-        const columnText = columnValue.toLowerCase();
-        const regexValue = value.toLowerCase();
-
-        switch (operator) {
-          case '$eq':
-            return columnText === regexValue;
-          case '$ne':
-            return columnText !== regexValue;
-          case '$regex':
-            return new RegExp(regexValue, 'i').test(columnText);
-          case '$nregex':
-            return !new RegExp(regexValue, 'i').test(columnText);
-          default:
-            return false;
-        }
+      const operator = match[1];
+      const value = match[3];
+      if(!value) return true;
+      this.filter.emit({ filters: this.columnFilters });
+      const isString = typeof columnValue === 'string';
+      const isNumber = typeof columnValue === 'number';
+      switch (operator) {
+        case '$eq':
+          return isString ? columnValue.toLowerCase() === value.toLowerCase() : columnValue === parseFloat(value);
+        case '$ne':
+          return isString ? columnValue.toLowerCase() !== value.toLowerCase() : columnValue !== parseFloat(value);
+        case '$lt':
+          return isNumber ? columnValue < parseFloat(value) : false;
+        case '$lte':
+          return isNumber ? columnValue <= parseFloat(value) : false;
+        case '$gt':
+          return isNumber ? columnValue > parseFloat(value) : false;
+        case '$gte':
+          return isNumber ? columnValue >= parseFloat(value) : false;
+        case '$regex':
+          return isString ? new RegExp(value, 'i').test(columnValue) : false;
+        case '$nregex':
+          return isString ? !new RegExp(value, 'i').test(columnValue) : false;
+        default:
+          return true;
       }
     }
-
+    
     // Comparación por defecto
     if (typeof columnValue === 'string') {
       return columnValue.toLowerCase().includes(condition.toLowerCase());
@@ -324,7 +309,7 @@ export class BtTable {
       return columnValue.toString().includes(condition);
     }
 
-    return false; // Caso no reconocido
+    return true; // Caso no reconocido
   }
   private async handleRowSelection(id: string) {
     const selected = new Set(this.selectedRows);
@@ -610,15 +595,7 @@ export class BtTable {
                       </span>
                       {header.filterable && (
                         <Fragment>
-                          {/* <label class="sr-only" htmlFor="column-filter">{`${this.config.filter} ${header}`}</label>
-                          <input
-                            id="column-filter"
-                            type="text"
-                            placeholder={`${this.config.filter} ${header.key}`}
-                            value={this.columnFilters[header.key]}
-                            onChange={event => this.handleColumnFilterChange(header.key, event)}
-                          /> */}
-                          <bt-column-search type={header.type} onFilterChange={(event: CustomEvent) => this.handleColumnFilterChange(header.key, event)}></bt-column-search>
+                          <bt-column-search type={header.type} options={header.options} onFilterChange={(event: CustomEvent) => this.handleColumnFilterChange(header.key, event)}></bt-column-search>
                         </Fragment>
                       )}
                     </div>
@@ -653,7 +630,7 @@ export class BtTable {
                   ))}
                   {Object.keys(this.actions).length > 0 && (
                     <td class="actionscell" headers={this.config.actions}>
-                      <bt-dropdown options={this.actions} x="right" y={i === arr.length - 1 ? 'top' : 'bottom'}></bt-dropdown>
+                      <bt-dropdown onAction={this.emitCellAction.bind(this)} options={this.actions} x="right" y={i === arr.length - 1 ? 'top' : 'bottom'}></bt-dropdown>
                     </td>
                   )}
                 </tr>
